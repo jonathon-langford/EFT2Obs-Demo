@@ -39,7 +39,7 @@ Block mass
   16 0.000000 # vt : 0.0 
   21 0.000000 # g : 0.0 
   22 0.000000 # a : 0.0 
-  23 101.009687 # z : cmath.sqrt((gw__exp__2*vev__exp__2*(1 - cT + (ee__exp__2*(cw__exp__2*cWW + cB*sw__exp__2 + 4*cA*sw__exp__4)*vev__exp__2)/(2.*cw__exp__2*MW__exp__2*sw__exp__2)))/cw__exp__2)/2. 
+  23 91.163403e+01 # z : cmath.sqrt((gw__exp__2*vev__exp__2*(1 - cT + (ee__exp__2*(cw__exp__2*cWW + cB*sw__exp__2 + 4*cA*sw__exp__4)*vev__exp__2)/(2.*cw__exp__2*MW__exp__2*sw__exp__2)))/cw__exp__2)/2. 
 
 ###################################
 ## INFORMATION FOR NEWCOUP
