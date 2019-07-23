@@ -1,0 +1,16 @@
+import model HEL_UFO
+
+# Definitions
+define p = g u c d s u~ c~ d~ s~
+define j = g u c d s u~ c~ d~ s~
+define l+ = e+ mu+
+define l- = e- mu-
+define vl = ve vm vt
+define vl~ = ve~ vm~ vt~
+define p = p b b~
+define j = j b b~
+
+# Use NP^2<=1 to generate only SM + SM-BSM int.
+generate p p > h j j $$ w+ w- z NP^2<=1 @0
+
+output vbf
