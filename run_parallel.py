@@ -3,7 +3,7 @@ from optparse import OptionParser
 
 # Global variables
 MG_DIR = "MG5_aMC_v2_6_5"
-rivetProcessDict = {"ggh":"GGF", "vbf":"VBF"}
+rivetProcessDict = {"ggh":"GGF", "vbf":"VBF", "wh":"WH", "zh":"QQ2ZH", "ggzh":"GG2Zh", "tth":"TTH"}
 
 def leave():
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~ EFT2OBS RUN (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -54,7 +54,7 @@ if opt.mode == 'generate':
 
   #Copy proc_card into run directory and change name of output to include run label
   os.system("cp ./Cards/%s/proc_card.dat ./%s/run/proc_card_%s.dat"%(opt.process,MG_DIR,opt.runLabel))
-  os.system("sed -i \"s/.*output.*/output %s_%s/g\" %s/run/proc_card_%s.dat"%(opt.process,opt.runLabel,MG_DIR,opt.runLabel))
+  os.system("sed -i \"s/.*output.*/output %s_%s -nojpeg/g\" %s/run/proc_card_%s.dat"%(opt.process,opt.runLabel,MG_DIR,opt.runLabel))
 
   print " --> Setting up mg5 process: %s_%s"%(opt.process,opt.runLabel)
   print " --> Using proc card: ./Cards/%s/proc_card.dat"%opt.process
@@ -84,7 +84,7 @@ if opt.mode == 'generate':
   os.system("cp Cards/%s/{param,pythia8,reweight,run}_card.dat %s/run/%s_%s/Cards"%(opt.process,MG_DIR,opt.process,opt.runLabel))
 
   # Change pythia card for name of output hepmc
-  os.system("sed -i \"s/= auto/= %s_%s.hepmc/g\" %s/run/%s_%s/Cards/pythia8_card.dat"%(opt.process,opt.runLabel,MG_DIR,opt.process,opt.runLabel))
+  os.system("sed -i \"s/HEPMCoutput:file.*/HEPMCoutput:file         = %s_%s.hepmc/g\" %s/run/%s_%s/Cards/pythia8_card.dat"%(opt.process,opt.runLabel,MG_DIR,opt.process,opt.runLabel))
 
   # Change run card if specify number of events
   if opt.nEvents != '':

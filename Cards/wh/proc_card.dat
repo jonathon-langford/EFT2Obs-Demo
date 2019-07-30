@@ -1,0 +1,11 @@
+import model HEL_UFO
+
+# Definitions
+define V = w+ w-
+
+# Use NP^2<=1 to generate only SM + SM-BSM int.
+generate p p > V h NP^2<=1 @0
+add process p p > V h j NP^2<=1 @1
+add process p p > V h j j NP^2<=1 @2
+
+output wh
