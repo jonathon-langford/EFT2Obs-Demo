@@ -7,7 +7,7 @@ import ROOT
 from STXS import STXS_bins
 from EFT import HEL_parameters
 
-proc_to_STXS = {'ggh':'GG2H'}
+proc_to_STXS = {'ggh':'GG2H','vbf':'QQ2HQQ','wh':'QQ2HLNU','zh':'QQ2HLL'}
 offset = {'stage0':2, 'stage1':1, 'stage1_1':1}
 
 def leave():
@@ -15,7 +15,6 @@ def leave():
   sys.exit(1)
 
 
-  print "~~~~~~~~~~~~~~~~~~~~~~~~~ STXS2EFT: (extract scale functions) ~~~~~~~~~~~~~~~~~~~~~~~~~"
   
 def get_options():
   parser = OptionParser()
@@ -27,6 +26,8 @@ def get_options():
 (opt,args) = get_options()
 
 def extract_SF( stage, process, inputFile ):
+
+  print "~~~~~~~~~~~~~~~~~~~~~~~~~ STXS2EFT: (extract scale functions) ~~~~~~~~~~~~~~~~~~~~~~~~~"
 
   # Check if input root file exists
   if not os.path.exists( inputFile ):
@@ -72,9 +73,9 @@ def extract_SF( stage, process, inputFile ):
       pruned_param_scaling = {}
       max_coeff = -1
       for p in param_scaling: 
-        if param_scaling[p] > max_coeff: max_coeff = param_scaling[p]
+        if abs(param_scaling[p]) > max_coeff: max_coeff = abs(param_scaling[p])
       for p in param_scaling:
-        if param_scaling[p] > 0.001*max_coeff: pruned_param_scaling[p] = param_scaling[p]
+        if abs(param_scaling[p]) > 0.001*max_coeff: pruned_param_scaling[p] = param_scaling[p]
 
       # Loop over HEL parameters and output scaling functions in nice format
       line = '1.0'
@@ -92,11 +93,7 @@ def extract_SF( stage, process, inputFile ):
 
   leave()
 
-if __name__ == '__main__': extract_SF( opt.stage, opt.process, opt.inputFile )
-  
-    
-
-  
+if __name__ == '__main__': extract_SF( opt.stage, opt.process, opt.inputFile ) 
 
   
 

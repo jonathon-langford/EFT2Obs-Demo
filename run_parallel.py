@@ -3,7 +3,7 @@ from optparse import OptionParser
 
 # Global variables
 MG_DIR = "MG5_aMC_v2_6_5"
-rivetProcessDict = {"ggh":"GGF", "vbf":"VBF", "wh":"WH", "zh":"QQ2ZH", "ggzh":"GG2Zh", "tth":"TTH"}
+rivetProcessDict = {"ggh":"GGF", "vbf":"VBF", "wh":"WH", "zh":"QQ2ZH", "ggzh":"GG2Zh", "tth":"TTH", "ggh_gabija":"GGF"}
 
 def leave():
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~ EFT2OBS RUN (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -53,18 +53,18 @@ if opt.mode == 'generate':
     leave()
 
   #Copy proc_card into run directory and change name of output to include run label
-  os.system("cp ./Cards/%s/proc_card.dat ./%s/run/proc_card_%s.dat"%(opt.process,MG_DIR,opt.runLabel))
-  os.system("sed -i \"s/.*output.*/output %s_%s -nojpeg/g\" %s/run/proc_card_%s.dat"%(opt.process,opt.runLabel,MG_DIR,opt.runLabel))
+  os.system("cp ./Cards/%s/proc_card.dat ./%s/run/proc_card_%s_%s.dat"%(opt.process,MG_DIR,opt.process,opt.runLabel))
+  os.system("sed -i \"s/.*output.*/output %s_%s -nojpeg/g\" %s/run/proc_card_%s_%s.dat"%(opt.process,opt.runLabel,MG_DIR,opt.process,opt.runLabel))
 
   print " --> Setting up mg5 process: %s_%s"%(opt.process,opt.runLabel)
   print " --> Using proc card: ./Cards/%s/proc_card.dat"%opt.process
 
   # Run setup of process
-  os.system("pushd %s/run; ../bin/mg5_aMC proc_card_%s.dat; popd"%(MG_DIR,opt.runLabel))
+  os.system("pushd %s/run; ../bin/mg5_aMC proc_card_%s_%s.dat; popd"%(MG_DIR,opt.process,opt.runLabel))
   print " --> Finished setup of %s_%s"%(opt.process,opt.runLabel)
 
   # Delete tmp proc card in run folder
-  os.system("rm ./%s/run/proc_card_%s.dat"%(MG_DIR,opt.runLabel))
+  os.system("rm ./%s/run/proc_card_%s_%s.dat"%(MG_DIR,opt.process,opt.runLabel))
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # PREPARE: copy cards across and make mg run script
