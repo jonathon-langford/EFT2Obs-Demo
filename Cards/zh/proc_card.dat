@@ -13,4 +13,4 @@ add process p p > h vl vl~ / j2 ell+ ell- vl vl~ a h w+ w- NP^2<=1 @1
 #add process p p > h ell+ ell- j / j2 ell+ ell- vl vl~ a h w+ w- NP^2<=1 @2
 #add process p p > h vl vl~ j / j2 ell+ ell- vl vl~ a h w+ w- NP^2<=1 @3
 
-output zh -nojpeg
+output zh

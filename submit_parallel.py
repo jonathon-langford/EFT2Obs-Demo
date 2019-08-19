@@ -6,24 +6,19 @@ MG_DIR = "MG5_aMC_v2_6_5"
 
 def get_options():
   parser = OptionParser()
-  parser.add_option('--mode', dest='mode', default='generate', help='Running option: [generate,classification]')
   parser.add_option('--process', dest='process', default='ggh', help='Signal process')
   parser.add_option('--nJobs', dest='nJobs', default=1, type='int', help='Number of jobs')
   parser.add_option('--nEvents', dest='nEvents', default='10', help='Number of events per job')
-  parser.add_option('--deleteMG5RunDir', dest='deleteMG5RunDir', default=1, type='int', help="Delete MG5 run directory after producing hepmc [yes=1,no=0]")
+  parser.add_option('--classificationOnly', dest='classificationOnly', default=0, type='int', help='Only run classification stage (Rivet)')
+  parser.add_option('--saveMG5RunDir', dest='saveMG5RunDir', default=0, type='int', help="Save MG5 run directory [yes=1,no=0]")
+  parser.add_option('--saveHepMC', dest='saveHepMC', default=0, type='int', help="Save HepMC output [yes=1,no=0]")
   parser.add_option('--queue', dest='queue', default='microcentury', help="HTCondor Queue" )
   return parser.parse_args()
-
 (opt,args) = get_options()
 
-# Only allowed for two modes: generate and classification
-if opt.mode not in ['generate','classification']:
-  print " --> [ERROR] mode (%s) not allowed. Please use one of [generate,classification]. Leaving..."%opt.mode
-  sys.exit(1)
-
 #Submission details
-f_sub_name = "submit_%s_%s.sub"%(opt.mode,opt.process)
-sub_handle = "%s_%s_run$(procID)"%(opt.mode,opt.process)
+f_sub_name = "submit_%s.sub"%opt.process
+sub_handle = "%s_run$(procID)"%opt.process
 N_process = opt.nJobs
 
 # Make job directories
@@ -40,7 +35,7 @@ f_sub = open("%s"%f_sub_name,"w+")
 f_sub.write("plusone = $(Process) + 1\n")
 f_sub.write("procID = $INT(plusone,%d)\n\n")
 f_sub.write("executable          = parallel.sh\n")
-f_sub.write("arguments           = %s %s %s $(procID) %s %g\n"%(os.environ['PWD'],opt.mode,opt.process,opt.nEvents,opt.deleteMG5RunDir))
+f_sub.write("arguments           = %s %s $(procID) %s %g %g %g\n"%(os.environ['PWD'],opt.process,opt.nEvents,opt.classificationOnly,opt.saveMG5RunDir,opt.saveHepMC))
 f_sub.write("output              = Jobs/%s/out/%s.out\n"%(opt.process,sub_handle))
 f_sub.write("error               = Jobs/%s/err/%s.err\n"%(opt.process,sub_handle))
 f_sub.write("log                 = Jobs/%s/log/%s.log\n"%(opt.process,sub_handle))

@@ -3,7 +3,7 @@ from optparse import OptionParser
 
 # Global variables
 MG_DIR = "MG5_aMC_v2_6_5"
-rivetProcessDict = {"ggh":"GGF", "vbf":"VBF", "wh":"WH", "zh":"QQ2ZH", "ggzh":"GG2Zh", "tth":"TTH", "ggh_gabija":"GGF"}
+rivetProcessDict = {"ggh":"GGF", "vbf":"VBF", "wh":"WH", "zh":"QQ2ZH", "ggzh":"GG2Zh", "tth":"TTH", "ggh_bsm":"GGF"}
 
 def leave():
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~ EFT2OBS RUN (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -11,38 +11,31 @@ def leave():
 
 def get_options():
   parser = OptionParser()
-  parser.add_option('--mode', dest='mode', default='setup', help='Running option: [generate,classification]')
   parser.add_option('--process', dest='process', default='ggh', help='Signal process')
   parser.add_option('--runLabel', dest='runLabel', default='pilot', help='Run label')
   parser.add_option('--nEvents', dest='nEvents', default='', help='Number of events per run')
-  parser.add_option('--deleteMG5RunDir', dest='deleteMG5RunDir', default=1, type='int', help="Delete MG5 run directory after producing hepmc [yes=1,no=0]")
+  parser.add_option('--classificationOnly', dest='classificationOnly', default=0, type='int', help='Only run classification stage (Rivet)')
+  parser.add_option('--saveMG5RunDir', dest='saveMG5RunDir', default=0, type='int', help="Save MG5 run directory [yes=1,no=0]")
+  parser.add_option('--saveHepMC', dest='saveHepMC', default=0, type='int', help="Save HepMC output [yes=1,no=0]")
   return parser.parse_args()
-
 (opt,args) = get_options()
 
 print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ EFT2OBS RUN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-# Check if in allowed modes
-if opt.mode not in ['generate','classification']:
-  print " --> [ERROR] mode (%s) not allowed. Please use one of [generate,classification]. Leaving..."%opt.mode
-  leave()
-  
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# SETUP: to set up mg5 process
+if not opt.classificationOnly:
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # SETUP: set up mg5 process
 
-if opt.mode == 'generate':
-
-  print " --> Using generate mode, process = %s, runLabel = %s"%(opt.process,opt.runLabel)
-
+  print " --> Process = %s, runLabel = %s"%(opt.process,opt.runLabel)
   # Make run directory in MG dir
   if not os.path.isdir( "%s/run"%MG_DIR ): 
     os.system("mkdir %s/run"%MG_DIR )
     print " --> Making %s/run directory for running process"%MG_DIR
   
-  # Check if process already exists in run dir
+  # Check if process already exists in run dir: if so then delete
   if os.path.isdir( "%s/run/%s_%s"%(MG_DIR,opt.process,opt.runLabel) ):
-    print " --> Configuration for process %s already exists for chosen run label: ./%s/run/%s_%s. Please use a different run label. Leaving..."%(opt.process,MG_DIR,opt.process,opt.runLabel)
-    leave()
+    print " --> Configuration for process %s already exists for chosen run label: ./%s/run/%s_%s. Will delete current run directory."%(opt.process,MG_DIR,opt.process,opt.runLabel)
+    os.system("rm -Rf ./%s/run/%s_%s"%(MG_DIR,opt.process,opt.runLabel))
 
   # Check relevant process is in the Cards directory, with proc card
   if not os.path.isdir( "Cards/%s"%opt.process ):
@@ -55,7 +48,6 @@ if opt.mode == 'generate':
   #Copy proc_card into run directory and change name of output to include run label
   os.system("cp ./Cards/%s/proc_card.dat ./%s/run/proc_card_%s_%s.dat"%(opt.process,MG_DIR,opt.process,opt.runLabel))
   os.system("sed -i \"s/.*output.*/output %s_%s -nojpeg/g\" %s/run/proc_card_%s_%s.dat"%(opt.process,opt.runLabel,MG_DIR,opt.process,opt.runLabel))
-
   print " --> Setting up mg5 process: %s_%s"%(opt.process,opt.runLabel)
   print " --> Using proc card: ./Cards/%s/proc_card.dat"%opt.process
 
@@ -96,7 +88,7 @@ if opt.mode == 'generate':
   os.system("pushd %s/run/%s_%s; { echo \"shower=Pythia8\"; echo \"reweight=ON\"; echo \"done\"; } > mgrunscript; popd"%(MG_DIR,opt.process,opt.runLabel))
 
   print " --> Finished preparing %s_%s"%(opt.process,opt.runLabel)
- 
+   
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # GENERATE: > generate events for specified process
 
@@ -106,6 +98,10 @@ if opt.mode == 'generate':
   os.system("pushd %s/run/%s_%s; ./bin/generate_events %s < mgrunscript; popd"%(MG_DIR,opt.process,opt.runLabel,opt.runLabel))
   print " --> Successfully generated events."
 
+  # Check hepmc exists:
+  if not os.path.exists("%s/run/%s_%s/Events/%s/%s_%s.hepmc"%(MG_DIR,opt.process,opt.runLabel,opt.runLabel,opt.process,opt.runLabel)):
+    print " --> [ERROR] HepMC file production has not been successful. Check log. Leaving..."
+    leave()
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # MOVE: hepmc output to directory
@@ -113,8 +109,7 @@ if opt.mode == 'generate':
   if not os.path.isdir("Events"): os.system("mkdir ./Events")
   if not os.path.isdir("./Events/%s"%opt.process): os.system("mkdir ./Events/%s"%opt.process)
 
-  # Gunzip hepmc file and move to corresponding folder
-  #os.system("gunzip %s/run/%s_%s/Events/%s/%s_%s.hepmc.gz"%(MG_DIR,opt.process,opt.runLabel,opt.runLabel,opt.process,opt.runLabel))
+  # Move hepmc to output directory
   print " --> Moving output hepmc to ./Events/%s/hepmc/"%(opt.process)
   if not os.path.isdir("./Events/%s/hepmc"%opt.process): os.system("mkdir ./Events/%s/hepmc"%opt.process)
 
@@ -135,46 +130,48 @@ if opt.mode == 'generate':
     print " --> Saved: ./Events/%s/hepmc/%s_%s.hepmc"%(opt.process,opt.process,opt.runLabel)
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # DELETE TMP RUN FOLDER
-  if opt.deleteMG5RunDir:
+  # DELETE MGDIR
+  if not opt.saveMG5RunDir:
     print " --> Deleting %s/run/%s_%s ..."%(MG_DIR,opt.process,opt.runLabel)  
     os.system("rm -Rf %s/run/%s_%s"%(MG_DIR,opt.process,opt.runLabel))
-
-  leave()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # CLASSIFICATION:
 
-elif opt.mode == 'classification':
+print " --> Classification for process = %s, run label = %s"%(opt.process,opt.runLabel)
 
-  print " --> Using classification mode: process = %s, run label = %s"%(opt.process,opt.runLabel)
-
-  # Check if hepmc for process exists
-  f_hepmc = "./Events/%s/hepmc/%s_%s.hepmc"%(opt.process,opt.process,opt.runLabel)
-  if not os.path.exists( f_hepmc ):
-    print " --> [ERROR] input hepmc file does not exist: %s. Leaving..."%f_hepmc
-    leave()
-
-  print " --> Input hepmc file: %s"%f_hepmc
-  
-  # Make cmd line to run: set up environment
-  cmdLine = "source local/rivetenv.sh; export RIVET_ANALYSIS_PATH=./Classification; export HIGGSPRODMODE=%s;"%rivetProcessDict[opt.process]
-      
-  # Make directories to store yoda and root files
-  if not os.path.isdir("./Events/%s/yoda"%opt.process): os.system("mkdir ./Events/%s/yoda"%opt.process)
-  if not os.path.isdir("./Events/%s/root"%opt.process): os.system("mkdir ./Events/%s/root"%opt.process)
-
-  # Add running rivet to cmd line
-  f_yoda = "./Events/%s/yoda/%s_%s.yoda"%(opt.process,opt.process,opt.runLabel)  
-  f_root = f_yoda.replace("yoda","root")
-  cmdLine += " rivet --analysis=HiggsTemplateCrossSections \"%s\" -o %s; yoda2root %s %s"%(f_hepmc,f_yoda,f_yoda,f_root)
-      
-  # Running command line
-  os.system( cmdLine )
-
-  print " --> Output yoda file: %s"%f_yoda
-  print " --> Converting to root: %s"%f_root
+# Check if hepmc for process exists
+f_hepmc = "./Events/%s/hepmc/%s_%s.hepmc"%(opt.process,opt.process,opt.runLabel)
+if not os.path.exists( f_hepmc ):
+  print " --> [ERROR] HepMC file (%s) does not exist. Check log. Leaving..."%f_hepmc
   leave()
+
+print " --> Input hepmc file: %s"%f_hepmc
+  
+# Make cmd line to run: set up environment
+cmdLine = "source local/rivetenv.sh; export RIVET_ANALYSIS_PATH=./Classification; export HIGGSPRODMODE=%s;"%rivetProcessDict[opt.process]
+      
+# Make directories to store yoda file
+if not os.path.isdir("./Events/%s/yoda"%opt.process): os.system("mkdir ./Events/%s/yoda"%opt.process)
+
+# Add running rivet to cmd line
+f_yoda = "./Events/%s/yoda/%s_%s.yoda"%(opt.process,opt.process,opt.runLabel)  
+cmdLine += " rivet --analysis=HiggsTemplateCrossSections \"%s\" -o %s"%(f_hepmc,f_yoda)
+      
+# Running command line
+os.system( cmdLine )
+
+print " --> Output yoda file: %s"%f_yoda
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# DELETE HEPMC FILE
+if not opt.saveHepMC:
+  print " --> Deleting HepMC file: %s"%f_hepmc
+  os.system("rm %s"%f_hepmc)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# END OF PROGRAM
+leave()
 
 
 
