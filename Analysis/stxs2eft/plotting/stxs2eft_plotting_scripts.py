@@ -3,6 +3,309 @@ import os
 import math
 import glob
 
+# Function to plot Ai
+def plot_Ai( outDir, stage, process, ai_matrix, u_ai_matrix, stxs_bins, eft_parameters, procToSTXSProductionModeMap):
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # CHECKS
+  if not os.path.isdir( outDir ):
+    print "--> [WARNING] Output directory (%s) does not exist. Will NOT plot for %s"%(outDir,process)
+    return 0
+  # Make directory for process if already exists
+  if os.path.isdir( "%s/%s_stage%s"%(outDir,process,stage) ):
+    # If Ai plots already exist...
+    if len(glob.glob("%s/%s_stage%s/*_Ai*"%(outDir,process,stage))) != 0:
+      overwrite = input(" --> [INPUT] Ai plots already exist in output directory for process %s, stage %s. Do you want to overwrite [1=yes,0=no]:"%(process,stage))
+      if not overwrite:
+        print " --> Will NOT plot Ai for %s, stage %s"%(process,stage)
+        return 0
+  else: os.system("mkdir %s/%s_stage%s"%(outDir,process,stage))
+
+  print " --> Plotting Ai plots for %s, stage %s. Output directory: %s/%s_stage%s"%(process,stage,outDir,process,stage)
+
+  #Global settings
+  ROOT.gStyle.SetOptStat(0)
+  ROOT.gROOT.SetBatch(ROOT.kTRUE)
+  procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616}
+  
+  # Loop over STXS bins relevant to process
+  s = "stage%s"%stage
+  for stxs_bin in stxs_bins[s]:
+    if stxs_bin.split("_")[0] == procToSTXSProductionModeMap[process]:
+
+      #IGNORE FWDH BINS
+      if "FWDH" in stxs_bin: continue
+
+      # Determine set of params in Ai matrices
+      params = []
+      for param in eft_parameters:
+        t = param['title']
+        # Not interested in CP conjugate coeff for now
+        if t[0] != 't':
+          if t in ai_matrix[process][stxs_bin]: params.append(t)
+
+      # Create TCanvas
+      canv = ROOT.TCanvas("canv_%s"%stxs_bin,"canv_%s"%stxs_bin,800,400)
+      canv.SetLogy()
+      
+      # |Ai distribution|
+      # define histogram for axes: bins = number of params
+      h_axes = ROOT.TH1F("h_axes_%s"%stxs_bin, "", len(params), 0, len(params))
+      for i in range(1,h_axes.GetNbinsX()+1): h_axes.GetXaxis().SetBinLabel(i,params[i-1])
+      h_axes.GetXaxis().SetLabelSize(0.05)
+      h_axes.GetYaxis().SetTitle("|A_{j}|")
+      h_axes.GetYaxis().SetTitleSize(0.05)
+      h_axes.GetYaxis().SetLabelSize(0.04)
+      h_axes.GetYaxis().SetTitleOffset(0.5)
+      h_axes.GetYaxis().CenterTitle()
+
+      # Determine bin centers
+      Xbincentre = []
+      for _bin in range(1,len(params)+1): Xbincentre.append(h_axes.GetXaxis().GetBinCenter(_bin))
+
+      # Save max/min value of points
+      max_ai = 20
+      min_ai = 1
+ 
+      # Two TGraphs: use different markers for +ve/-ve Ai
+      gr_pos = ROOT.TGraphAsymmErrors()
+      gr_pos.SetMarkerStyle(34)
+      gr_pos.SetMarkerSize(1.5)
+      gr_pos.SetMarkerColor(procColorMap[process])
+      gr_pos.SetLineColor(procColorMap[process])
+      gr_pos.SetLineWidth(2)
+      gr_neg = ROOT.TGraphAsymmErrors()
+      gr_neg.SetMarkerStyle(28)
+      gr_neg.SetMarkerSize(1.5)
+      gr_neg.SetMarkerColor(procColorMap[process])
+      gr_neg.SetLineColor(procColorMap[process])
+      gr_neg.SetLineWidth(2)
+      p_pos, p_neg = 0, 0
+      for j in range(len(params)):
+        ai = ai_matrix[process][stxs_bin][params[j]]
+        u_ai = u_ai_matrix[process][stxs_bin][params[j]]
+        if ai >= 0:
+          gr_pos.SetPoint(p_pos,Xbincentre[j],abs(ai))
+          gr_pos.SetPointError(p_pos,0,0,u_ai,u_ai)
+          p_pos+=1
+          if abs(ai) < min_ai: min_ai = abs(ai)
+          if (abs(ai)+u_ai) > max_ai: max_ai = abs(ai)+u_ai
+        else:
+          gr_neg.SetPoint(p_neg,Xbincentre[j],abs(ai))
+          gr_neg.SetPointError(p_neg,0,0,u_ai,u_ai)
+          p_neg+=1
+          if abs(ai) < min_ai: min_ai = abs(ai)
+          if (abs(ai)+u_ai) > max_ai: max_ai = abs(ai)+u_ai
+ 
+      # Set minimum and maximum in y-axes
+      max_ai = math.pow(10,math.log(5*max_ai,10))
+      if math.pow(10,int(math.log(min_ai))-1) < 0.001: min_ai = 0.00101
+      else: min_ai = math.pow(10,int(math.log(min_ai))-1)
+      h_axes.SetMaximum(max_ai)
+      h_axes.SetMinimum(min_ai)
+
+      # Draw plot
+      h_axes.Draw()
+      gr_pos.Draw("Same P")
+      gr_neg.Draw("Same P")
+      
+      # Draw a line for each param
+      lines = {}
+      for j in range(1,len(params)):
+        key = "Line_%g"%j
+        lines[key] = ROOT.TLine(j,min_ai,j,max_ai)
+        lines[key].SetLineWidth(1)
+        lines[key].SetLineStyle(4)
+        lines[key].Draw("Same")
+
+      # Add text to canvas and update
+      lat = ROOT.TLatex()
+      lat.SetTextFont(42)
+      lat.SetLineWidth(2)
+      lat.SetTextAlign(11)
+      lat.SetNDC()
+      lat.SetTextSize(0.042)
+      lat.DrawLatex(0.1,0.92,"#scale[0.75]{#bf{%s}}"%stxs_bin)
+
+      # Add legend to plot
+      leg = ROOT.TLegend(0.5,0.91,0.9,0.97)
+      leg.SetFillColor(0)
+      leg.SetLineColor(0)
+      leg.SetNColumns(2)
+      leg.AddEntry(gr_pos,"A_{j} >= 0","P")
+      leg.AddEntry(gr_neg,"A_{j} < 0","P")
+      leg.Draw("Same")
+
+      #Save canvas and close
+      canv.Update()
+      canv.SaveAs("%s/%s_stage%s/%s_Ai.png"%(outDir,process,stage,stxs_bin))
+      canv.SaveAs("%s/%s_stage%s/%s_Ai.pdf"%(outDir,process,stage,stxs_bin))
+      canv.Close()
+
+  # END OF LOOP OVER STXS BINS
+
+# END OF FUNCTION
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Function to plot Bij
+def plot_Bij( outDir, stage, process, bij_matrix, u_bij_matrix, stxs_bins, eft_parameters, procToSTXSProductionModeMap):
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # CHECKS
+  if not os.path.isdir( outDir ):
+    print "--> [WARNING] Output directory (%s) does not exist. Will NOT plot for %s"%(outDir,process)
+    return 0
+  # Make directory for process if already exists
+  if os.path.isdir( "%s/%s_stage%s"%(outDir,process,stage) ):
+    # If Bij plots already exist...
+    if len(glob.glob("%s/%s_stage%s/*_Bij*"%(outDir,process,stage))) != 0:
+      overwrite = input(" --> [INPUT] Bij plots already exist in output directory for process %s, stage %s. Do you want to overwrite [1=yes,0=no]:"%(process,stage))
+      if not overwrite:
+        print " --> Will NOT plot Bij for %s, stage %s"%(process,stage)
+        return 0
+  else: os.system("mkdir %s/%s_stage%s"%(outDir,process,stage))
+
+  print " --> Plotting Bij plots for %s, stage %s. Output directory: %s/%s_stage%s"%(process,stage,outDir,process,stage)
+
+  #Global settings
+  ROOT.gStyle.SetOptStat(0)
+  ROOT.gROOT.SetBatch(ROOT.kTRUE)
+  procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616}
+  
+  # Loop over STXS bins relevant to process
+  s = "stage%s"%stage
+  for stxs_bin in stxs_bins[s]:
+    if stxs_bin.split("_")[0] == procToSTXSProductionModeMap[process]:
+
+      #IGNORE FWDH BINS
+      if "FWDH" in stxs_bin: continue
+
+      # Determine set of squared+cross terms in Bij matrixes
+      terms = []
+      for param in eft_parameters:
+        t = param['title']
+        # Not interested in CP conjugate coeff for now
+        if t[0] != 't':
+          if t in bij_matrix[process][stxs_bin]: terms.append(t)
+      # Mixed
+      for param_i in eft_parameters:
+        for param_j in eft_parameters:
+          if eft_parameters.index(param_i) < eft_parameters.index(param_j):
+            t_i = param_i['title']
+            t_j = param_j['title']
+            # Not interested in CP conjugate coeff for now
+            if( t_i[0] == 't' )|( t_j[0] == 't' ): continue
+            tt = "%s%s"%(t_i,t_j)
+            if( tt in bij_matrix[process][stxs_bin] ): terms.append(tt)
+        
+      # Create TCanvas
+      canv = ROOT.TCanvas("canv_%s"%stxs_bin,"canv_%s"%stxs_bin,800,400)
+      canv.SetLogy()
+      
+      # |Bij distribution|
+      # define histogram for axes: bins = number of terms
+      h_axes = ROOT.TH1F("h_axes_%s"%stxs_bin, "", len(terms), 0, len(terms))
+      for i in range(1,h_axes.GetNbinsX()+1): 
+        # Squared terms
+        if len(terms[i-1].split("c")) == 2: h_axes.GetXaxis().SetBinLabel(i,terms[i-1]+"^{2}")
+        # Mixed terms
+        else: h_axes.GetXaxis().SetBinLabel(i,terms[i-1])
+      h_axes.GetXaxis().SetLabelSize(0.05)
+      h_axes.GetYaxis().SetTitle("|B_{jk}|")
+      h_axes.GetYaxis().SetTitleSize(0.05)
+      h_axes.GetYaxis().SetLabelSize(0.04)
+      h_axes.GetYaxis().SetTitleOffset(0.5)
+      h_axes.GetYaxis().CenterTitle()
+
+      # Determine bin centers
+      Xbincentre = []
+      for _bin in range(1,len(terms)+1): Xbincentre.append(h_axes.GetXaxis().GetBinCenter(_bin))
+
+      # Save max/min value of points
+      max_bij = 20
+      min_bij = 1
+ 
+      # Two TGraphs: use different markers for +ve/-ve Ai
+      gr_pos = ROOT.TGraphAsymmErrors()
+      gr_pos.SetMarkerStyle(34)
+      gr_pos.SetMarkerSize(1.5)
+      gr_pos.SetMarkerColor(procColorMap[process])
+      gr_pos.SetLineColor(procColorMap[process])
+      gr_pos.SetLineWidth(2)
+      gr_neg = ROOT.TGraphAsymmErrors()
+      gr_neg.SetMarkerStyle(28)
+      gr_neg.SetMarkerSize(1.5)
+      gr_neg.SetMarkerColor(procColorMap[process])
+      gr_neg.SetLineColor(procColorMap[process])
+      gr_neg.SetLineWidth(2)
+      p_pos, p_neg = 0, 0
+      for j in range(len(terms)):
+        bij = bij_matrix[process][stxs_bin][terms[j]]
+        u_bij = u_bij_matrix[process][stxs_bin][terms[j]]
+        if bij >= 0:
+          gr_pos.SetPoint(p_pos,Xbincentre[j],abs(bij))
+          #gr_pos.SetPointError(p_pos,0,0,u_bij,u_bij)
+          p_pos+=1
+          if abs(bij) < min_bij: min_bij = abs(bij)
+          if (abs(bij)+u_bij) > max_bij: max_bij = abs(bij)+u_bij
+        else:
+          gr_neg.SetPoint(p_neg,Xbincentre[j],abs(bij))
+          #gr_neg.SetPointError(p_neg,0,0,u_bij,u_bij)
+          p_neg+=1
+          if abs(bij) < min_bij: min_bij = abs(bij)
+          if (abs(bij)+u_bij) > max_bij: max_bij = abs(bij)+u_bij
+ 
+      # Set minimum and maximum in y-axes
+      max_bij = math.pow(10,math.log(5*max_bij,10))
+      if math.pow(10,int(math.log(min_bij))-1) < 0.001: min_bij = 0.00101
+      else: min_bij = math.pow(10,int(math.log(min_bij))-1)
+      h_axes.SetMaximum(max_bij)
+      h_axes.SetMinimum(min_bij)
+
+      # Draw plot
+      h_axes.Draw()
+      gr_pos.Draw("Same P")
+      gr_neg.Draw("Same P")
+      
+      # Draw a line for each param
+      lines = {}
+      for j in range(1,len(terms)):
+        key = "Line_%g"%j
+        lines[key] = ROOT.TLine(j,min_bij,j,max_bij)
+        lines[key].SetLineWidth(1)
+        lines[key].SetLineStyle(4)
+        lines[key].Draw("Same")
+
+      # Add text to canvas and update
+      lat = ROOT.TLatex()
+      lat.SetTextFont(42)
+      lat.SetLineWidth(2)
+      lat.SetTextAlign(11)
+      lat.SetNDC()
+      lat.SetTextSize(0.042)
+      lat.DrawLatex(0.1,0.92,"#scale[0.75]{#bf{%s}}"%stxs_bin)
+
+      # Add legend to plot
+      leg = ROOT.TLegend(0.5,0.91,0.9,0.97)
+      leg.SetFillColor(0)
+      leg.SetLineColor(0)
+      leg.SetNColumns(2)
+      leg.AddEntry(gr_pos,"B_{jk} >= 0","P")
+      leg.AddEntry(gr_neg,"B_{jk} < 0","P")
+      leg.Draw("Same")
+
+      #Save canvas and close
+      canv.Update()
+      canv.SaveAs("%s/%s_stage%s/%s_Bij.png"%(outDir,process,stage,stxs_bin))
+      canv.SaveAs("%s/%s_stage%s/%s_Bij.pdf"%(outDir,process,stage,stxs_bin))
+      canv.Close()
+
+  # END OF LOOP OVER STXS BINS
+
+# END OF FUNCTION
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 # Function to plot Ai comparison: wg1 note and stxs2eft
 def plot_Ai_comparison( outDir, stage, process, ai_matrix_base, ai_matrix_new, u_ai_matrix_new, stxs_bins, eft_parameters, procToSTXSProductionModeMap, verbose=False ):
 
@@ -17,16 +320,16 @@ def plot_Ai_comparison( outDir, stage, process, ai_matrix_base, ai_matrix_new, u
     print " --> [WARNING] Output directory (%s) does not exist. Will NOT plot for %s"%(outDir,process)
     return 0
   # Make directory for process: if already exists then ask user if they want to overwrite
-  if os.path.isdir( "%s/%s"%(outDir,process) ):
+  if os.path.isdir( "%s/%s_validation"%(outDir,process) ):
     # If Ai comparison plots already exist...
-    if len(glob.glob("%s/%s/*_Ai_cmp*"%(outDir,process))) != 0:
+    if len(glob.glob("%s/%s_validation/*_Ai_cmp*"%(outDir,process))) != 0:
       overwrite = input(" --> [INPUT] Ai comparison plots already exist in output directory for process %s. Do you want to overwrite [1=yes,0=no]:"%process)
       if not overwrite:
         print " --> Will NOT plot Ai comparison for %s"%process
         return 0
-  else: os.system("mkdir %s/%s"%(outDir,process))
+  else: os.system("mkdir %s/%s_validation"%(outDir,process))
   
-  print " --> Plotting Ai comparison plots for %s. Output directory: %s/%s"%(process,outDir,process)
+  print " --> Plotting Ai comparison plots for %s. Output directory: %s/%s_validation"%(process,outDir,process)
 
   # Global settings
   ROOT.gStyle.SetOptStat(0)
@@ -73,7 +376,7 @@ def plot_Ai_comparison( outDir, stage, process, ai_matrix_base, ai_matrix_new, u
       h_axes = ROOT.TH1F("h_axes_%s"%stxs_bin,"",len(params),0,len(params))
       for i in range(1,h_axes.GetNbinsX()+1): h_axes.GetXaxis().SetBinLabel(i,params[i-1])
       h_axes.GetXaxis().SetLabelSize(0)
-      h_axes.GetYaxis().SetTitle("|A_{i}|")
+      h_axes.GetYaxis().SetTitle("|A_{j}|")
       h_axes.GetYaxis().SetTitleSize(0.08)
       h_axes.GetYaxis().SetLabelSize(0.07)
       h_axes.GetYaxis().SetTitleOffset(0.5)
@@ -315,8 +618,8 @@ def plot_Ai_comparison( outDir, stage, process, ai_matrix_base, ai_matrix_new, u
 
       # Save canvas and close
       canv.Update()
-      canv.SaveAs("%s/%s/%s_Ai_cmp.png"%(outDir,process,stxs_bin))
-      canv.SaveAs("%s/%s/%s_Ai_cmp.pdf"%(outDir,process,stxs_bin))
+      canv.SaveAs("%s/%s_validation/%s_Ai_cmp.png"%(outDir,process,stxs_bin))
+      canv.SaveAs("%s/%s_validation/%s_Ai_cmp.pdf"%(outDir,process,stxs_bin))
       canv.Close() 
 
       if verbose:
@@ -343,16 +646,16 @@ def plot_Bij_comparison( outDir, stage, process, bij_matrix_base, bij_matrix_new
     print " --> [WARNING] Output directory (%s) does not exist. Will NOT plot for %s"%(outDir,process)
     return 0
   # Make directory for process: if already exists then ask user if they want to overwrite
-  if os.path.isdir( "%s/%s"%(outDir,process) ):
+  if os.path.isdir( "%s/%s_validation"%(outDir,process) ):
     # If Bij comparison plots already exist...
-    if len(glob.glob("%s/%s/*_Bij_cmp*"%(outDir,process))) != 0:
+    if len(glob.glob("%s/%s_validation/*_Bij_cmp*"%(outDir,process))) != 0:
       overwrite = input(" --> [INPUT] Bij comparison plots already exist in output directory for process %s. Do you want to overwrite [1=yes,0=no]:"%process)
       if not overwrite:
         print " --> Will NOT plot Bij comparison for %s"%process
         return 0
-  else: os.system("mkdir %s/%s"%(outDir,process))
+  else: os.system("mkdir %s/%s_validation"%(outDir,process))
 
-  print " --> Plotting Bij comparison plots for %s. Output directory: %s/%s"%(process,outDir,process)
+  print " --> Plotting Bij comparison plots for %s. Output directory: %s/%s_validation"%(process,outDir,process)
 
   # Global settings
   ROOT.gStyle.SetOptStat(0)
@@ -404,7 +707,7 @@ def plot_Bij_comparison( outDir, stage, process, bij_matrix_base, bij_matrix_new
       pad1.SetBottomMargin(0.01)
       pad2 = ROOT.TPad("pad2_%s"%stxs_bin,"",0,0,1,0.38)
       pad2.SetTopMargin(0.01)
-      pad2.SetBottomMargin(0.15)
+      pad2.SetBottomMargin(0.2)
       pad1.Draw()
       pad2.Draw()
 
@@ -419,7 +722,7 @@ def plot_Bij_comparison( outDir, stage, process, bij_matrix_base, bij_matrix_new
         else: 
           h_axes.GetXaxis().SetBinLabel(i,terms[i-1])
       h_axes.GetXaxis().SetLabelSize(0)
-      h_axes.GetYaxis().SetTitle("|B_{ij}|")
+      h_axes.GetYaxis().SetTitle("|B_{jk}|")
       h_axes.GetYaxis().SetTitleSize(0.08)
       h_axes.GetYaxis().SetLabelSize(0.07)
       h_axes.GetYaxis().SetTitleOffset(0.5)
@@ -671,8 +974,8 @@ def plot_Bij_comparison( outDir, stage, process, bij_matrix_base, bij_matrix_new
 
       # Save canvas and close
       canv.Update()
-      canv.SaveAs("%s/%s/%s_Bij_cmp.png"%(outDir,process,stxs_bin))
-      canv.SaveAs("%s/%s/%s_Bij_cmp.pdf"%(outDir,process,stxs_bin))
+      canv.SaveAs("%s/%s_validation/%s_Bij_cmp.png"%(outDir,process,stxs_bin))
+      canv.SaveAs("%s/%s_validation/%s_Bij_cmp.pdf"%(outDir,process,stxs_bin))
       canv.Close() 
 
       if verbose:

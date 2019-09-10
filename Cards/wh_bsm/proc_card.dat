@@ -1,0 +1,12 @@
+import model HEL_UFO
+
+# Definitions
+define ell+ = e+ mu+ ta+
+define ell- = e- mu- ta-
+define j2 = g u c d s u~ c~ d~ s~
+
+# Generate BSM terms
+generate p p > h ell- vl~ / j2 ell+ ell- vl vl~ a h z NP^2==2 @0
+add process p p > h ell+ vl / j2 ell+ ell- vl vl~ a h z NP^2==2 @1
+
+output wh_bsm -nojpeg

@@ -41,3 +41,15 @@ HEL_parameters = [
   {'param':'tc3W','title':'tc3W', 'value':0.1}, 
   {'param':'tc3G','title':'tc3G', 'value':0.1}
 ]
+
+HEL_parameters_subset = [
+  {'param':'cu','title':'cu', 'value':0.1}, 
+  {'param':'cd','title':'cd', 'value':0.1}, 
+  {'param':'cl','title':'cl', 'value':0.1}, 
+  {'param':'cWW','title':'cWW', 'value':0.1}, 
+  {'param':'cB','title':'cB', 'value':0.1}, 
+  {'param':'cHW','title':'cHW', 'value':0.1}, 
+  {'param':'cHB','title':'cHB', 'value':0.1}, 
+  {'param':'cA','title':'cA\'', 'value':0.1, 'divide_by':157.913670416}, 
+  {'param':'cG','title':'cG\'', 'value':0.1, 'divide_by':157.913670416}, 
+]

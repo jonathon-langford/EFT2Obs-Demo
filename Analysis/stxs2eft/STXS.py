@@ -2,10 +2,9 @@
 
 STXS_bins = {
 
-  "stage0":["unknown",
+  "stage0":["blank","unknown",
             "GG2H_FWDH","GG2H",
-            "VBF_FWDH","VBF",
-            "VH2HQQ_FWDH","VH2HQQ",
+            "QQ2HQQ_FWDH","QQ2HQQ",
             "QQ2HLNU_FWDH","QQ2HLNU",
             "QQ2HLL_FWDH","QQ2HLL",
             "GG2HLL_FWDH","GG2HLL",
@@ -37,3 +36,19 @@ STXS_bins = {
              ]
    
 }
+
+#STXStoCombineMap = {
+#
+#  "stage0":{
+#    "GG2H":,
+#    "QQ2HQQ":,
+#    "QQ2HLNU":,
+#    "QQ2HLL":,
+#    "GG2HLL":,
+#    "TTH":,
+#    "BBH":
+#    "TH":
+#  }
+#
+#
+#}

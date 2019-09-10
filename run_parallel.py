@@ -3,7 +3,7 @@ from optparse import OptionParser
 
 # Global variables
 MG_DIR = "MG5_aMC_v2_6_5"
-rivetProcessDict = {"ggh":"GGF", "vbf":"VBF", "wh":"WH", "zh":"QQ2ZH", "ggzh":"GG2Zh", "tth":"TTH", "ggh_bsm":"GGF"}
+rivetProcessDict = {"ggh":"GGF", "vbf":"VBF", "wh":"WH", "zh":"QQ2ZH", "ggzh":"GG2ZH", "tth":"TTH"}
 
 def leave():
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~ EFT2OBS RUN (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -149,7 +149,7 @@ if not os.path.exists( f_hepmc ):
 print " --> Input hepmc file: %s"%f_hepmc
   
 # Make cmd line to run: set up environment
-cmdLine = "source local/rivetenv.sh; export RIVET_ANALYSIS_PATH=./Classification; export HIGGSPRODMODE=%s;"%rivetProcessDict[opt.process]
+cmdLine = "source local/rivetenv.sh; export RIVET_ANALYSIS_PATH=./Classification; export HIGGSPRODMODE=%s;"%rivetProcessDict[opt.process.split("_")[0]]
       
 # Make directories to store yoda file
 if not os.path.isdir("./Events/%s/yoda"%opt.process): os.system("mkdir ./Events/%s/yoda"%opt.process)

@@ -40,6 +40,7 @@ f_sub.write("output              = Jobs/%s/out/%s.out\n"%(opt.process,sub_handle
 f_sub.write("error               = Jobs/%s/err/%s.err\n"%(opt.process,sub_handle))
 f_sub.write("log                 = Jobs/%s/log/%s.log\n"%(opt.process,sub_handle))
 f_sub.write("+JobFlavour         = \"%s\"\n"%opt.queue)
+#f_sub.write("RequestCpus         = 4\n")
 f_sub.write("queue %s\n"%N_process)
 f_sub.close()
 
