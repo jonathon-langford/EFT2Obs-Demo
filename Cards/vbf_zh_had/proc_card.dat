@@ -1,0 +1,6 @@
+import model HEL_UFO
+
+# Use NP^2<=1 to generate only SM + SM-BSM int.
+generate p p > Z > h j j / j l+ l- vl vl~ h a QCD=0 NP^2<=1
+
+output vbf_zh_had --nojpeg

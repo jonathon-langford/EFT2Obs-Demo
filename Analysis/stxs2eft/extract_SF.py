@@ -14,8 +14,9 @@ from wg1_note.stage1_Bij import Bij_matrix_wg1
 
 # Import plotting scripts
 from plotting.stxs2eft_plotting_scripts import plot_Ai, plot_Bij, plot_Ai_comparison, plot_Bij_comparison
+from plotting.stxs2eft_latex import sf2latex
 
-proc_to_STXS = {'ggh':'GG2H','vbf':'QQ2HQQ','wh':'QQ2HLNU','zh':'QQ2HLL','tth':'TTH'}
+proc_to_STXS = {'ggh':'GG2H','vbf':'QQ2HQQ', 'wh':'QQ2HLNU','zh':'QQ2HLL','tth':'TTH'}
 offset = {'stage0':2, 'stage1':1, 'stage1_1':1}
 
 def leave( exit=True ):
@@ -31,6 +32,7 @@ def get_options():
   parser.add_option('--linearOnly', dest='linearOnly', default=0, type='int', help="Only calculate linear terms (Ai)")
   parser.add_option('--combineOutput', dest='combineOutput', default=0, type='int', help="Write scaling functions in format to be read by combine [1=yes,0=no]")
   parser.add_option('--textOutput', dest='textOutput', default=0, type='int', help="Display scaling functions on screen [1=yes,0=no]")
+  parser.add_option('--latexOutput', dest='latexOutput', default=0, type='int', help="Write scaling functions in latex format (table) [1=yes,0=no]")
   parser.add_option('--plotAi', dest='plotAi', default=0, type='int', help='Plot Ai terms')
   parser.add_option('--plotBij', dest='plotBij', default=0, type='int', help='Plot Bij terms')
   parser.add_option('--plotAiValidation', dest='plotAiValidation', default=0, type='int', help='Plot Ai terms comparison to WG1 note')
@@ -42,7 +44,7 @@ def get_options():
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FUNCTION FOR EXTRACT INTERFERENCE TERM
-def extract_Ai( stage, process, pois, inputFile ):
+def extract_Ai( stage, process, pois, inputFile, w=0.1 ):
 
   # Check input yoda file exists
   if not os.path.exists( inputFile ):
@@ -79,10 +81,9 @@ def extract_Ai( stage, process, pois, inputFile ):
       u_ai_tmp = {}
       for param in pois:
         p = param['param']
-        ci = param['value']
         x_rwgt = histDict[p].bins[stxs_idx].sumW
         u_rwgt = math.sqrt( histDict[p].bins[stxs_idx].sumW2 )
-        ai_tmp[p] = (x_rwgt-x_sm)/(x_sm*ci)
+        ai_tmp[p] = (x_rwgt-x_sm)/(x_sm*w)
         u_ai_tmp[p] = abs(ai_tmp[p]*math.sqrt((u_rwgt/x_rwgt)*(u_rwgt/x_rwgt)+(u_sm/x_sm)*(u_sm/x_sm)))
 
       # Pruning: only save HEL params which have Ai > 0.001*max_Ai
@@ -154,12 +155,12 @@ def extract_Bij( stage, process, pois, inputFile_sm, inputFile_bsm, w=0.1, f=1.,
 
   # Calculate scaling factor: numEntries in SM/numEntries in BSM: FIXME change specific to cG
   #                           required as using different sample of events for bsm and sm
-  if process in ['wh','zh']: nEntries_BSM = float(histDict['bsm_cHW'].numEntries())
+  if process in ['vbf','wh','zh']: nEntries_BSM = float(histDict['bsm_cHW'].numEntries())
   else: nEntries_BSM = float(histDict['bsm_cG'].numEntries())
   nEntries_SM = histDict['sm'].numEntries()
   #print " --> [DEBUG] SM = %.4f, BSM = %.4f"%(nEntries_SM,nEntries_BSM)
   sf = nEntries_SM/nEntries_BSM
-  #print " --> [DEBUG] s.f. = %.4f"%sf
+  print " --> [DEBUG] s.f. = %.4f"%sf
 
   # Define dicts to store Bij for each param + param pair for each STXS process
   Bij = {}
@@ -320,7 +321,7 @@ def sf2text( stage, process, pois, ai_matrix, bij_matrix, linearOnly=True ):
                 t_j = re.sub('\'','',t_j)
                 sign = "+" if bij>=0 else "-"
                 if sign == "-": line += ' %s%.4f * %s * %s'%(sign,abs(bij),t_i,t_j)
-                else: ' %s %.4f * %s * %s'%(sign,abs(bij),t_i,t_j)
+                else: line += ' %s %.4f * %s * %s'%(sign,abs(bij),t_i,t_j)
                 #line += ' %s %.4g*%s*%s'%(sign,abs(bij),t_i,t_j)
                 
       # Print to screen
@@ -336,7 +337,7 @@ def sf2combine( stage, processes, pois, ai_matrix, bij_matrix, linearOnly=True )
   if not os.path.isdir("./output"): os.system("mkdir ./output")
 
   #Open file to write to
-  if linearOnly: f_out = open("output/stage%s_xs_Aionly.txt"%stage,"w")
+  if linearOnly: f_out = open("output/stage%s_xs_Aionly_PURE.txt"%stage,"w")
   else: f_out = open("output/stage%s_xs.txt"%stage,"w")
 
   equations = []
@@ -390,7 +391,7 @@ def sf2combine( stage, processes, pois, ai_matrix, bij_matrix, linearOnly=True )
                   t_j = re.sub('\'','',t_j)
                   sign = "+" if bij>=0 else "-"
                   if sign == "-": line += ' %s%.4f * %s * %s'%(sign,abs(bij),t_i,t_j)
-                  else: ' %s %.4f * %s * %s'%(sign,abs(bij),t_i,t_j)
+                  else: line += ' %s %.4f * %s * %s'%(sign,abs(bij),t_i,t_j)
                   #line += ' %s %.4g*%s*%s'%(sign,abs(bij),t_i,t_j)
                   
         # Print to screen
@@ -424,6 +425,9 @@ if __name__ == '__main__':
 
   print "~~~~~~~~~~~~~~~~~~~~~~~~~ STXS2EFT: (extract scale functions) ~~~~~~~~~~~~~~~~~~~~~~~~~"
 
+  print " --> STAGE: %s"%opt.stage
+  print " --> PROCESSES: %s"%opt.processes
+
   if opt.freezeOtherParameters: parametersOfInterest = HEL_parameters_subset
   else: parametersOfInterest = HEL_parameters
 
@@ -433,8 +437,10 @@ if __name__ == '__main__':
   for proc in opt.processes.split(","): 
 
     # Ai
-    fin = "../../Events/%s/yoda/%s.yoda"%(proc,proc)
-    Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, parametersOfInterest, fin )
+    fin = "../../Events/%s_pure/yoda/%s_pure.yoda"%(proc,proc)
+    #fin = "../../Events/%s/yoda/%s.yoda"%(proc,proc)
+    if proc == "vbf": Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, parametersOfInterest, fin, w=0.0001 )
+    else: Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, parametersOfInterest, fin, w=0.1 )
 
     if not opt.linearOnly:
       # Bij
@@ -444,7 +450,30 @@ if __name__ == '__main__':
     # Display full scaling functions to screen
     if opt.textOutput: sf2text( opt.stage, proc, parametersOfInterest, Ai_matrix, Bij_matrix, linearOnly=opt.linearOnly )
 
+
   if opt.combineOutput: sf2combine( opt.stage, opt.processes, parametersOfInterest, Ai_matrix, Bij_matrix, linearOnly=opt.linearOnly )
+
+ 
+  # LATEX output: hardcoded to give tables we want
+  if opt.latexOutput:
+    if opt.stage == "0":
+      sf2latex( opt.stage, opt.processes, Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Ai")
+      sf2latex( opt.stage, opt.processes, Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Bij")
+    elif opt.stage == "1":
+      sf2latex( opt.stage, "ggh,vbf", Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Ai")
+      sf2latex( opt.stage, "wh,zh,tth", Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Ai")
+      sf2latex( opt.stage, "ggh", Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Bij")
+      sf2latex( opt.stage, "vbf", Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Bij")
+      sf2latex( opt.stage, "wh,zh,tth", Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Bij")
+    elif opt.stage == "1_1":
+      sf2latex( opt.stage, "ggh", Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Ai")
+      sf2latex( opt.stage, "vbf", Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Ai")
+      sf2latex( opt.stage, "wh,zh,tth", Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Ai")
+      sf2latex( opt.stage, "ggh", Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Bij")
+      sf2latex( opt.stage, "vbf", Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Bij", vbf_split="set1")
+      sf2latex( opt.stage, "vbf", Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Bij", vbf_split="set2")
+      sf2latex( opt.stage, "wh", Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Bij")
+      sf2latex( opt.stage, "zh,tth", Ai_matrix, Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, mode="Bij")
 
   # Plotting: if user has set outputDir then plot
   if opt.outputDir != '': 

@@ -16,31 +16,52 @@ Ai_matrix_wg1 = {
    },
 
   # QQ2HQQ terms: from note
-  'vbf':{
-   'QQ2HQQ_VBFTOPO_JET3VETO':{"cH":-1.0,"cT":-1.0,"cWW":1.3,"cB":-0.023,"cHW":-4.3,"cHB":-0.29,"cHQ":0.092,"cpHQ":-5.3,"cHu":-0.33,"cHd":0.12},
-   'QQ2HQQ_VBFTOPO_JET3':{"cH":-1.0,"cT":-1.1,"cWW":1.2,"cB":-0.027,"cHW":-5.8,"cHB":-0.41,"cHQ":0.13,"cpHQ":-6.9,"cHu":-0.45,"cHd":0.15},
-   'QQ2HQQ_VH2JET':{"cH":-0.99,"cT":-1.2,"cWW":7.8,"cB":-0.19,"cHW":-31,"cHB":-2.4,"cHQ":0.9,"cpHQ":-38,"cHu":-2.8,"cHd":0.9},
-   'QQ2HQQ_REST':{"cH":-1.0,"cT":-1.0,"cWW":1.4,"cB":-0.028,"cHW":-6.2,"cHB":-0.42,"cHQ":0.14,"cpHQ":-6.9,"cHu":-0.42,"cHd":0.16},
-   'QQ2HQQ_PTJET1_GT200':{"cH":-1.0,"cT":-0.95,"cWW":1.5,"cB":-0.025,"cHW":-3.6,"cHB":-0.24,"cHQ":0.084,"cpHQ":-4.5,"cHu":-0.25,"cHd":0.1},
-   },
+  #'vbf':{
+  # 'QQ2HQQ_VBFTOPO_JET3VETO':{"cH":-1.0,"cT":-1.0,"cWW":1.3,"cB":-0.023,"cHW":-4.3,"cHB":-0.29,"cHQ":0.092,"cpHQ":-5.3,"cHu":-0.33,"cHd":0.12},
+  # 'QQ2HQQ_VBFTOPO_JET3':{"cH":-1.0,"cT":-1.1,"cWW":1.2,"cB":-0.027,"cHW":-5.8,"cHB":-0.41,"cHQ":0.13,"cpHQ":-6.9,"cHu":-0.45,"cHd":0.15},
+  # 'QQ2HQQ_VH2JET':{"cH":-0.99,"cT":-1.2,"cWW":7.8,"cB":-0.19,"cHW":-31,"cHB":-2.4,"cHQ":0.9,"cpHQ":-38,"cHu":-2.8,"cHd":0.9},
+  # 'QQ2HQQ_REST':{"cH":-1.0,"cT":-1.0,"cWW":1.4,"cB":-0.028,"cHW":-6.2,"cHB":-0.42,"cHQ":0.14,"cpHQ":-6.9,"cHu":-0.42,"cHd":0.16},
+  # 'QQ2HQQ_PTJET1_GT200':{"cH":-1.0,"cT":-0.95,"cWW":1.5,"cB":-0.025,"cHW":-3.6,"cHB":-0.24,"cHQ":0.084,"cpHQ":-4.5,"cHu":-0.25,"cHd":0.1},
+  # 'QQ2HQQ_VH2JET':{"cH":-1.0,"cT":-1.0,"cWW":1.4,"cB":-0.028,"cHW":-6.2,"cHB":-0.42,"cHQ":0.14,"cpHQ":-6.9,"cHu":-0.42,"cHd":0.16},
+  # 'QQ2HQQ_REST':{"cH":-1.0,"cT":-0.95,"cWW":1.5,"cB":-0.025,"cHW":-3.6,"cHB":-0.24,"cHQ":0.084,"cpHQ":-4.5,"cHu":-0.25,"cHd":0.1},
+  # 'QQ2HQQ_PTJET1_GT200':{"cH":-0.99,"cT":-1.2,"cWW":7.8,"cB":-0.19,"cHW":-31,"cHB":-2.4,"cHQ":0.9,"cpHQ":-38,"cHu":-2.8,"cHd":0.9},
+  # },
 
   # Weighted terms: VBF + WH_had + ZH_had
   #'vbf':{
-  # 'QQ2HQQ_VBFTOPO_JET3VETO':{"cH":-0.0047,"cT":-0.0080,"cWW":1.4378,"cB":-0.0031,"cHW":-4.2272,"cHB":-0.2832,"cHQ":-0.0043,"cpHQ":0.1585,"cHu":0.0152,"cHd":-0.0052},
-  # 'QQ2HQQ_VBFTOPO_JET3':{"cH":-0.0627,"cT":-0.0995,"cWW":3.7432,"cB":0.2372,"cHW":-4.2968,"cHB":-0.2769,"cHQ":-0.0590,"cpHQ":2.2241,"cHu":0.2100,"cHd":-0.0698},
-  # 'QQ2HQQ_VH2JET':{"cH":-0.8931,"cT":-1.4367,"cWW":38.2540,"cB":3.7558,"cHW":17.9631,"cHB":1.7254,"cHQ":-0.8620,"cpHQ":32.5319,"cHu":2.8505,"cHd":-1.0745},
-  # 'QQ2HQQ_REST':{"cH":-0.3626,"cT":-0.5797,"cWW":12.9063,"cB":1.1947,"cHW":1.4549,"cHB":0.2287,"cHQ":-0.2584,"cpHQ":9.4851,"cHu":0.8616,"cHd":-0.3342},
-  # 'QQ2HQQ_PTJET1_GT200':{"cH":-0.3410,"cT":-0.5521,"cWW":61.3381,"cB":5.5757,"cHW":26.0698,"cHB":3.0360,"cHQ":-1.5782,"cpHQ":56.6605,"cHu":5.3293,"cHd":-1.7166}
+  # 'QQ2HQQ_VBFTOPO_JET3VETO':{"cWW":2.439423,"cB":0.080395,"cHW":-3.766823,"cHB":-0.250074},
+  # 'QQ2HQQ_VBFTOPO_JET3':{"cWW":1.355322,"cB":-0.014338,"cHW":-5.672183,"cHB":-0.399386},
+  # 'QQ2HQQ_VH2JET':{"cWW":34.230110,"cB":2.791937,"cHW":15.431824,"cHB":1.228743},
+  # 'QQ2HQQ_REST':{"cWW":6.289227,"cB":0.390137,"cHW":-1.493175,"cHB":-0.071782},
+  # 'QQ2HQQ_PTJET1_GT200':{"cWW":31.174274,"cB":1.502787,"cHW":-5.923059,"cHB":-0.686964},
   # },
 
   # Purely VBF terms: from twiki
+  'vbf':{
+   'QQ2HQQ_VBFTOPO_JET3VETO':{"cWW":1.256,"cB":-0.02319,"cHW":-4.31,"cHB":-0.2907},
+   'QQ2HQQ_VBFTOPO_JET3':{"cWW":1.204,"cB":-0.02692,"cHW":-5.76,"cHB":-0.4058},
+   'QQ2HQQ_VH2JET':{"cWW":1.389,"cB":-0.0284,"cHW":-6.23,"cHB":-0.417},
+   'QQ2HQQ_REST':{"cWW":1.546,"cB":-0.02509,"cHW":-3.631,"cHB":-0.2361},
+   'QQ2HQQ_PTJET1_GT200':{"cWW":7.82,"cB":-0.1868,"cHW":-30.65,"cHB":-2.371}
+   },
+
+  # Purely WH had terms: from twiki
   #'vbf':{
-  # 'QQ2HQQ_VBFTOPO_JET3VETO':{'cHB': -0.29, 'cH': -1.0, 'cHd': 0.12, 'cB': -0.023, 'cWW': 1.3, 'cHQ': 0.092, 'cHu': -0.33, 'cHW': -4.3, 'cpHQ': -5.3, 'cT': -1.0},
-  # 'QQ2HQQ_VBFTOPO_JET3':{'cHB': -0.41, 'cH': -1.0, 'cHd': 0.15, 'cB': -0.027, 'cWW': 1.2, 'cHQ': 0.13, 'cHu': -0.45, 'cHW': -5.8, 'cpHQ': -6.9, 'cT': -1.1},
-  # 'QQ2HQQ_VH2JET':{'cHB': -0.42, 'cH': -1.0, 'cHd': 0.16, 'cB': -0.028, 'cWW': 1.4, 'cHQ': 0.14, 'cHu': -0.42, 'cHW': -6.2, 'cpHQ': -6.9, 'cT': -1.0},
-  # 'QQ2HQQ_REST':{'cHB': -0.24, 'cH': -1.0, 'cHd': 0.1, 'cB': -0.025, 'cWW': 1.5, 'cHQ': 0.084, 'cHu': -0.25, 'cHW': -3.6, 'cpHQ': -4.5, 'cT': -0.95},
-  # 'QQ2HQQ_PTJET1_GT200':{'cHB': -2.4, 'cH': -0.99, 'cHd': 0.9, 'cB': -0.19, 'cWW': 7.8, 'cHQ': 0.9, 'cHu': -2.8, 'cHW': -31.0, 'cpHQ': -38.0, 'cT': -1.2}
+  # 'QQ2HQQ_VBFTOPO_JET3VETO':{"cH":-0.94,"cWW":39.5,"cHW":13.8,"cpHQ":32.1},
+  # 'QQ2HQQ_VBFTOPO_JET3':{"cH":-1.04,"cWW":44.9,"cHW":20.3,"cpHQ":36.8},
+  # 'QQ2HQQ_VH2JET':{"cH":-0.996,"cWW":45.57,"cHW":23.66,"cpHQ":37.55},
+  # 'QQ2HQQ_REST':{"cH":-1.002,"cWW":34.29,"cHW":11.56,"cpHQ":26.27},
+  # 'QQ2HQQ_PTJET1_GT200':{"cH":-1.003,"cWW":181.2,"cHW":152.3,"cpHQ":173.7}
   # },
+
+  # Purely ZH had terms: from twiki
+  #'vbf':{
+  # 'QQ2HQQ_VBFTOPO_JET3VETO':{"cH":-0.94,"cT":-4.0,"cWW":34.8,"cB":10.0,"cHW":9.9,"cHB":3.04,"cHQ":-2.14,"cpHQ":31.1,"cHu":7.6,"cHd":-2.59},
+  # 'QQ2HQQ_VBFTOPO_JET3':{"cH":-0.97,"cT":-3.98,"cWW":38.1,"cB":10.5,"cHW":14.2,"cHB":4.15,"cHQ":-2.36,"cpHQ":34.5,"cHu":8.4,"cHd":-2.79},
+  # 'QQ2HQQ_VH2JET':{"cH":-0.998,"cT":-4.002,"cWW":37.99,"cB":10.47,"cHW":16.45,"cHB":4.927,"cHQ":-2.401,"cpHQ":34.45,"cHu":7.94,"cHd":-2.993},
+  # 'QQ2HQQ_REST':{"cH":-1.001,"cT":-3.998,"cWW":30.89,"cB":8.35,"cHW":8.71,"cHB":2.616,"cHQ":-1.782,"cpHQ":26.1,"cHu":5.942,"cHd":-2.305},
+  # 'QQ2HQQ_PTJET1_GT200':{"cH":-1.003,"cT":-4.03,"cWW":141.5,"cB":41.6,"cHW":112.5,"cHB":33.6,"cHQ":-11.52,"cpHQ":156.2,"cHu":38.9,"cHd":-12.53}
+  #},
 
   'wh':{
    'QQ2HLNU_PTV_0_150':{'cpHL': 2.0, 'cH': -1.0, 'cpHQ': 24.0, 'cWW': 34.0, 'cHW': 11.0},
@@ -57,6 +78,6 @@ Ai_matrix_wg1 = {
    },
 
   'tth':{
-   'TTH':{'cH': -0.98, 'c3G': 27.0, 'cG': 0.93, 'cuG': 310.0, 'c2G': -13.0, 'cu': 2.9}
+   'TTH':{'cH': -0.98, 'c3G': 27.0, "cG'": 0.93, 'cuG': 310.0, 'c2G': -13.0, 'cu': 2.9}
    }
 }

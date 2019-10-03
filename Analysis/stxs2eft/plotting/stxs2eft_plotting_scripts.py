@@ -45,18 +45,18 @@ def plot_Ai( outDir, stage, process, ai_matrix, u_ai_matrix, stxs_bins, eft_para
           if t in ai_matrix[process][stxs_bin]: params.append(t)
 
       # Create TCanvas
-      canv = ROOT.TCanvas("canv_%s"%stxs_bin,"canv_%s"%stxs_bin,800,400)
+      canv = ROOT.TCanvas("canv_%s"%stxs_bin,"canv_%s"%stxs_bin,1000,400)
       canv.SetLogy()
       
       # |Ai distribution|
       # define histogram for axes: bins = number of params
       h_axes = ROOT.TH1F("h_axes_%s"%stxs_bin, "", len(params), 0, len(params))
       for i in range(1,h_axes.GetNbinsX()+1): h_axes.GetXaxis().SetBinLabel(i,params[i-1])
-      h_axes.GetXaxis().SetLabelSize(0.05)
+      h_axes.GetXaxis().SetLabelSize(0.15)
       h_axes.GetYaxis().SetTitle("|A_{j}|")
-      h_axes.GetYaxis().SetTitleSize(0.05)
-      h_axes.GetYaxis().SetLabelSize(0.04)
-      h_axes.GetYaxis().SetTitleOffset(0.5)
+      h_axes.GetYaxis().SetTitleSize(0.1)
+      h_axes.GetYaxis().SetLabelSize(0.06)
+      h_axes.GetYaxis().SetTitleOffset(0.3)
       h_axes.GetYaxis().CenterTitle()
 
       # Determine bin centers
@@ -70,13 +70,13 @@ def plot_Ai( outDir, stage, process, ai_matrix, u_ai_matrix, stxs_bins, eft_para
       # Two TGraphs: use different markers for +ve/-ve Ai
       gr_pos = ROOT.TGraphAsymmErrors()
       gr_pos.SetMarkerStyle(34)
-      gr_pos.SetMarkerSize(1.5)
+      gr_pos.SetMarkerSize(3)
       gr_pos.SetMarkerColor(procColorMap[process])
       gr_pos.SetLineColor(procColorMap[process])
       gr_pos.SetLineWidth(2)
       gr_neg = ROOT.TGraphAsymmErrors()
       gr_neg.SetMarkerStyle(28)
-      gr_neg.SetMarkerSize(1.5)
+      gr_neg.SetMarkerSize(3)
       gr_neg.SetMarkerColor(procColorMap[process])
       gr_neg.SetLineColor(procColorMap[process])
       gr_neg.SetLineWidth(2)
@@ -101,6 +101,8 @@ def plot_Ai( outDir, stage, process, ai_matrix, u_ai_matrix, stxs_bins, eft_para
       max_ai = math.pow(10,math.log(5*max_ai,10))
       if math.pow(10,int(math.log(min_ai))-1) < 0.001: min_ai = 0.00101
       else: min_ai = math.pow(10,int(math.log(min_ai))-1)
+      max_ai = 10
+      min_ai = 0.099
       h_axes.SetMaximum(max_ai)
       h_axes.SetMinimum(min_ai)
 
@@ -125,16 +127,16 @@ def plot_Ai( outDir, stage, process, ai_matrix, u_ai_matrix, stxs_bins, eft_para
       lat.SetTextAlign(11)
       lat.SetNDC()
       lat.SetTextSize(0.042)
-      lat.DrawLatex(0.1,0.92,"#scale[0.75]{#bf{%s}}"%stxs_bin)
+      #lat.DrawLatex(0.1,0.92,"#bf{%s}"%stxs_bin)
 
       # Add legend to plot
       leg = ROOT.TLegend(0.5,0.91,0.9,0.97)
       leg.SetFillColor(0)
       leg.SetLineColor(0)
       leg.SetNColumns(2)
-      leg.AddEntry(gr_pos,"A_{j} >= 0","P")
-      leg.AddEntry(gr_neg,"A_{j} < 0","P")
-      leg.Draw("Same")
+      leg.AddEntry(gr_pos,"A_{j}/B_{jk} >= 0","P")
+      leg.AddEntry(gr_neg,"A_{j}/B_{jk} < 0","P")
+      #leg.Draw("Same")
 
       #Save canvas and close
       canv.Update()
@@ -199,8 +201,9 @@ def plot_Bij( outDir, stage, process, bij_matrix, u_bij_matrix, stxs_bins, eft_p
             if( tt in bij_matrix[process][stxs_bin] ): terms.append(tt)
         
       # Create TCanvas
-      canv = ROOT.TCanvas("canv_%s"%stxs_bin,"canv_%s"%stxs_bin,800,400)
+      canv = ROOT.TCanvas("canv_%s"%stxs_bin,"canv_%s"%stxs_bin,1000,400)
       canv.SetLogy()
+      canv.SetBottomMargin(.15)
       
       # |Bij distribution|
       # define histogram for axes: bins = number of terms
@@ -210,11 +213,11 @@ def plot_Bij( outDir, stage, process, bij_matrix, u_bij_matrix, stxs_bins, eft_p
         if len(terms[i-1].split("c")) == 2: h_axes.GetXaxis().SetBinLabel(i,terms[i-1]+"^{2}")
         # Mixed terms
         else: h_axes.GetXaxis().SetBinLabel(i,terms[i-1])
-      h_axes.GetXaxis().SetLabelSize(0.05)
+      h_axes.GetXaxis().SetLabelSize(0.12)
       h_axes.GetYaxis().SetTitle("|B_{jk}|")
-      h_axes.GetYaxis().SetTitleSize(0.05)
-      h_axes.GetYaxis().SetLabelSize(0.04)
-      h_axes.GetYaxis().SetTitleOffset(0.5)
+      h_axes.GetYaxis().SetTitleSize(0.1)
+      h_axes.GetYaxis().SetLabelSize(0.06)
+      h_axes.GetYaxis().SetTitleOffset(0.3)
       h_axes.GetYaxis().CenterTitle()
 
       # Determine bin centers
@@ -228,7 +231,7 @@ def plot_Bij( outDir, stage, process, bij_matrix, u_bij_matrix, stxs_bins, eft_p
       # Two TGraphs: use different markers for +ve/-ve Ai
       gr_pos = ROOT.TGraphAsymmErrors()
       gr_pos.SetMarkerStyle(34)
-      gr_pos.SetMarkerSize(1.5)
+      gr_pos.SetMarkerSize(3)
       gr_pos.SetMarkerColor(procColorMap[process])
       gr_pos.SetLineColor(procColorMap[process])
       gr_pos.SetLineWidth(2)
@@ -259,6 +262,8 @@ def plot_Bij( outDir, stage, process, bij_matrix, u_bij_matrix, stxs_bins, eft_p
       max_bij = math.pow(10,math.log(5*max_bij,10))
       if math.pow(10,int(math.log(min_bij))-1) < 0.001: min_bij = 0.00101
       else: min_bij = math.pow(10,int(math.log(min_bij))-1)
+      max_bij = 30
+      min_bij = 0.5
       h_axes.SetMaximum(max_bij)
       h_axes.SetMinimum(min_bij)
 
@@ -283,7 +288,7 @@ def plot_Bij( outDir, stage, process, bij_matrix, u_bij_matrix, stxs_bins, eft_p
       lat.SetTextAlign(11)
       lat.SetNDC()
       lat.SetTextSize(0.042)
-      lat.DrawLatex(0.1,0.92,"#scale[0.75]{#bf{%s}}"%stxs_bin)
+      #lat.DrawLatex(0.1,0.92,"#scale[0.75]{#bf{%s}}"%stxs_bin)
 
       # Add legend to plot
       leg = ROOT.TLegend(0.5,0.91,0.9,0.97)
@@ -292,7 +297,7 @@ def plot_Bij( outDir, stage, process, bij_matrix, u_bij_matrix, stxs_bins, eft_p
       leg.SetNColumns(2)
       leg.AddEntry(gr_pos,"B_{jk} >= 0","P")
       leg.AddEntry(gr_neg,"B_{jk} < 0","P")
-      leg.Draw("Same")
+      #leg.Draw("Same")
 
       #Save canvas and close
       canv.Update()
@@ -334,7 +339,9 @@ def plot_Ai_comparison( outDir, stage, process, ai_matrix_base, ai_matrix_new, u
   # Global settings
   ROOT.gStyle.SetOptStat(0)
   ROOT.gROOT.SetBatch(ROOT.kTRUE) #suppress output to screen
-  procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616}
+  procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616} # VBF
+  #procColorMap = {"ggh":862,"vbf":632,"wh":418,"zh":413,"tth":616} #WH Had
+  #procColorMap = {"ggh":862,"vbf":894,"wh":418,"zh":413,"tth":616} #ZH Had
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Loop over STXS bins relevant to process

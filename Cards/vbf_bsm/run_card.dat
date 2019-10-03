@@ -66,17 +66,27 @@
   average =  event_norm       ! average/sum. Normalization of the weight in the LHEF
 
 #*********************************************************************
-# Matching parameter (MLM only)
-#*********************************************************************
- 1 = ickkw            ! 0 no matching, 1 MLM
+## Matching - Warning! ickkw > 1 is still beta
+##*********************************************************************
+ 0 = ickkw            ! 0 no matching, 1 MLM, 2 CKKW matching
+ 1 = highestmult      ! for ickkw=2, highest mult group
+ 1 = ktscheme         ! for ickkw=1, 1 Durham kT, 2 Pythia pTE
  1.0 = alpsfact         ! scale factor for QCD emission vx
  False = chcluster        ! cluster only according to channel diag
+ True = pdfwgt           ! for ickkw=1, perform pdf reweighting
  4 = asrwgtflavor     ! highest quark flavor for a_s reweight
- True  = auto_ptj_mjj  ! Automatic setting of ptj and mjj if xqcut >0
-                                   ! (turn off for VBF and single top processes) 
- 10.0   = xqcut   ! minimum kt jet measure between partons
+ True = clusinfo         ! include clustering tag in output
+ 3.0 = lhe_version       ! Change the way clustering information pass to shower.
 #*********************************************************************
-#
+##**********************************************************
+##
+##**********************************************************
+## Automatic ptj and mjj cuts if xqcut > 0
+## (turn off for VBF and single top processes)
+##**********************************************************
+   False  = auto_ptj_mjj  ! Automatic setting of ptj and mjj
+#**********************************************************
+
 #*********************************************************************
 # handling of the helicities:
 #  0: sum over all helicities
@@ -98,7 +108,7 @@
 #*********************************************************************
 # BW cutoff (M+/-bwcutoff*Gamma) ! Define on/off-shell for "$" and decay  
 #*********************************************************************
-  15.0  = bwcutoff      ! (M+/-bwcutoff*Gamma)
+  5000.0  = bwcutoff      ! (M+/-bwcutoff*Gamma)
 #*********************************************************************
 # Apply pt/E/eta/dr/mij/kt_durham cuts on decay products or not
 # (note that etmiss/ptll/ptheavy/ht/sorted cuts always apply)
@@ -109,18 +119,17 @@
 #*********************************************************************
 # Minimum and maximum pt's (for max, -1 means no cut)                *
 #*********************************************************************
- 20.0  = ptj       ! minimum pt for the jets 
- 0.0  = ptb       ! minimum pt for the b 
- 10.0  = pta       ! minimum pt for the photons 
- 10.0  = ptl       ! minimum pt for the charged leptons 
+ 25.0  = ptj       ! minimum pt for the jets
+ 0.0  = ptb       ! minimum pt for the b
+ 0.0  = pta       ! minimum pt for the photons
+ 0.0  = ptl       ! minimum pt for the charged leptons
  0.0  = misset    ! minimum missing Et (sum of neutrino's momenta)
+ 0.0  = ptheavy   ! minimum pt for one heavy final state
  -1.0  = ptjmax    ! maximum pt for the jets
  -1.0  = ptbmax    ! maximum pt for the b
  -1.0  = ptamax    ! maximum pt for the photons
  -1.0  = ptlmax    ! maximum pt for the charged leptons
  -1.0  = missetmax ! maximum missing Et (sum of neutrino's momenta)
- {} = pt_min_pdg ! pt cut for other particles (use pdg code). Applied on particle and anti-particle
- {}	= pt_max_pdg ! pt cut for other particles (syntax e.g. {6: 100, 25: 50}) 
 #*********************************************************************
 # Minimum and maximum E's (in the center of mass frame)              *
 #*********************************************************************
@@ -137,10 +146,10 @@
 #*********************************************************************
 # Maximum and minimum absolute rapidity (for max, -1 means no cut)   *
 #*********************************************************************
-  5.0 = etaj    ! max rap for the jets 
+  -1.0 = etaj    ! max rap for the jets
   -1.0  = etab    ! max rap for the b
- 2.5  = etaa    ! max rap for the photons 
- 2.5  = etal    ! max rap for the charged leptons 
+ -1.0  = etaa    ! max rap for the photons
+ -1.0  = etal    ! max rap for the charged leptons
  0.0  = etajmin ! min rap for the jets
  0.0  = etabmin ! min rap for the b
  0.0  = etaamin ! min rap for the photons
@@ -150,16 +159,16 @@
 #*********************************************************************
 # Minimum and maximum DeltaR distance                                *
 #*********************************************************************
- 0.4 = drjj    ! min distance between jets 
- 0.0   = drbb    ! min distance between b's 
- 0.4 = drll    ! min distance between leptons 
- 0.4 = draa    ! min distance between gammas 
- 0.0   = drbj    ! min distance between b and jet 
- 0.4 = draj    ! min distance between gamma and jet 
- 0.4 = drjl    ! min distance between jet and lepton 
- 0.0   = drab    ! min distance between gamma and b 
- 0.0   = drbl    ! min distance between b and lepton 
- 0.4 = dral    ! min distance between gamma and lepton 
+ 0.4 = drjj    ! min distance between jets
+ 0.0   = drbb    ! min distance between b's
+ 0.0 = drll    ! min distance between leptons
+ 0.0 = draa    ! min distance between gammas
+ 0.4   = drbj    ! min distance between b and jet
+ 0.4 = draj    ! min distance between gamma and jet
+ 0.4 = drjl    ! min distance between jet and lepton
+ 0.0   = drab    ! min distance between gamma and b
+ 0.0   = drbl    ! min distance between b and lepton
+ 0.0 = dral    ! min distance between gamma and lepton
  -1.0  = drjjmax ! max distance between jets
  -1.0  = drbbmax ! max distance between b's
  -1.0  = drllmax ! max distance between leptons
@@ -268,6 +277,10 @@
 # (otherwise b cuts are applied)                                     *
 #*********************************************************************
  4 = maxjetflavor    ! Maximum jet pdg code
+#*********************************************************************
+# Jet measure cuts                                                   *
+#*********************************************************************
+ 0.0   = xqcut   ! minimum kt jet measure between partons
 #*********************************************************************
 #
 #*********************************************************************

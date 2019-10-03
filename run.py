@@ -159,7 +159,7 @@ elif opt.mode == 'classification':
   print " --> Input hepmc file: %s"%f_hepmc
   
   # Make cmd line to run: set up environment
-  cmdLine = "source local/rivetenv.sh; export RIVET_ANALYSIS_PATH=./Classification; export HIGGSPRODMODE=%s;"%rivetProcessDict[opt.process]
+  cmdLine = "source local/rivetenv.sh; export RIVET_ANALYSIS_PATH=./Classification; export HIGGSPRODMODE=%s;"%rivetProcessDict[opt.process.split("_")[0]]
       
   # Make directories to store yoda and root files
   if not os.path.isdir("./Events/%s/yoda"%opt.process): os.system("mkdir ./Events/%s/yoda"%opt.process)

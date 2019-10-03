@@ -1,0 +1,5 @@
+import model HEL_UFO
+
+generate p p > h j j $$ Z W+ W- / j l+ l- vl vl~ h a QCD=0 NP^2<=1 @0
+
+output vbf_pure -nojpeg
