@@ -1,0 +1,5 @@
+import model HEL_UFO
+
+generate p p > h > l+ l- vl vl~ / t b t~ b~ a z j l+ l- vl vl~ NP^2==2
+
+output ggh_hww_leptonic_bsm --nojpeg

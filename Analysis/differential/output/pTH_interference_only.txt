@@ -1,0 +1,6 @@
+hww_leptonic_pTH_0_20:1 -0.932 * cH + 9.657 * cWW + 3.581 * cHW + 52.472 * cG + 3.729 * cpHL
+hww_leptonic_pTH_20_45:1 -0.992 * cH + 10.152 * cWW + 3.707 * cHW + 55.850 * cG + 3.969 * cpHL
+hww_leptonic_pTH_45_80:1 -1.046 * cH + 10.698 * cWW + 3.863 * cHW + 58.883 * cG + 4.184 * cpHL
+hww_leptonic_pTH_80_120:1 -1.000 * cH + 10.242 * cWW + 3.754 * cHW + 56.290 * cG + 4.000 * cpHL
+hww_leptonic_pTH_120_200:1 -1.012 * cH + 10.337 * cWW + 3.707 * cHW + 56.982 * cG + 4.049 * cpHL
+hww_leptonic_pTH_GT200:1 -0.962 * cH + 9.851 * cWW + 3.618 * cHW + 54.139 * cG + 3.847 * cpHL
