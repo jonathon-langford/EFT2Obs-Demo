@@ -339,9 +339,9 @@ def plot_Ai_comparison( outDir, stage, process, ai_matrix_base, ai_matrix_new, u
   # Global settings
   ROOT.gStyle.SetOptStat(0)
   ROOT.gROOT.SetBatch(ROOT.kTRUE) #suppress output to screen
-  procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616} # VBF
+  #procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616} # VBF
   #procColorMap = {"ggh":862,"vbf":632,"wh":418,"zh":413,"tth":616} #WH Had
-  #procColorMap = {"ggh":862,"vbf":894,"wh":418,"zh":413,"tth":616} #ZH Had
+  procColorMap = {"ggh":862,"vbf":894,"wh":418,"zh":413,"tth":616} #ZH Had
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Loop over STXS bins relevant to process
@@ -667,7 +667,9 @@ def plot_Bij_comparison( outDir, stage, process, bij_matrix_base, bij_matrix_new
   # Global settings
   ROOT.gStyle.SetOptStat(0)
   ROOT.gROOT.SetBatch(ROOT.kTRUE) #suppress output to screen
-  procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616}
+  #procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616} # VBF
+  #procColorMap = {"ggh":862,"vbf":632,"wh":418,"zh":413,"tth":616} #WH Had
+  procColorMap = {"ggh":862,"vbf":894,"wh":418,"zh":413,"tth":616} #ZH Had
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Loop over STXS bins relevant to process

@@ -2,7 +2,7 @@ import os, sys
 from optparse import OptionParser
 
 # Global variables
-MG_DIR = "MG5_aMC_v2_6_5"
+MG_DIR = "MG5_aMC_v2_6_6"
 rivetProcessDict = {"ggh":"GGF", "ggh_bsm":"GGF"}
 
 def leave():

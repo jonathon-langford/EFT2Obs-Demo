@@ -1,0 +1,5 @@
+import model HEL_UFO_fixed_MZ
+
+generate p p > Z > h j j / j l+ l- vl vl~ h a QED==3 NP^2==1 @0
+
+output vbf_zh_had_int -nojpeg

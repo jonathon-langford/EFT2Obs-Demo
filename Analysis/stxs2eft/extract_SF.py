@@ -3,6 +3,8 @@ import math
 from optparse import OptionParser
 import yoda
 import re
+import pickle
+import glob
 
 # Import dicts storing STXS processes and EFT coeff.
 from STXS import STXS_bins
@@ -28,6 +30,7 @@ def get_options():
   parser = OptionParser()
   parser.add_option('--stage', dest='stage', default='0', help="STXS stage [0,1,1_1]")
   parser.add_option('--processes', dest='processes', default='ggh', help="Comma separated list of signal process")
+  parser.add_option('--extension', dest='extension', default='', help="Extension to process")
   parser.add_option('--freezeOtherParameters', dest='freezeOtherParameters', default=0, type='int', help="Freeze all but [cG,cA,cu,cHW,cWW,cB]")
   parser.add_option('--linearOnly', dest='linearOnly', default=0, type='int', help="Only calculate linear terms (Ai)")
   parser.add_option('--combineOutput', dest='combineOutput', default=0, type='int', help="Write scaling functions in format to be read by combine [1=yes,0=no]")
@@ -44,24 +47,35 @@ def get_options():
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FUNCTION FOR EXTRACT INTERFERENCE TERM
-def extract_Ai( stage, process, pois, inputFile, w=0.1 ):
+def extract_Ai( stage, process, ext, pois, inputFile_sm, inputFile_int, w=0.1 ):
 
   # Check input yoda file exists
-  if not os.path.exists( inputFile ):
-    print " --> [ERROR] input file %s does not exists. Leaving..."%inputFile
+  if not os.path.exists( inputFile_sm ):
+    print " --> [ERROR] input file %s does not exists. Leaving..."%inputFile_sm
+    leave()
+  if not os.path.exists( inputFile_int ):
+    print " --> [ERROR] input file %s does not exists. Leaving..."%inputFile_int
     leave()
 
   # Extract all objects from yoda file
-  aos = yoda.read( inputFile )
+  aos_sm = yoda.read( inputFile_sm )
+  aos_int = yoda.read( inputFile_int )
   # Add hists for specified stage to dict: loop over HEL params
   histDict = {}
 
   # Requires a suffix: stage > 0 hists have additional string in name
   if stage == '0': suffix = ""
   else: suffix = "_pTjet30"
-  for param in pois: histDict[ param['param'] ] = aos[u'/RAW/HiggsTemplateCrossSections/STXS_stage%s%s[int_%s]'%(stage,suffix,param['param'])]
+  for param in pois: 
+    histDict[ param['param'] ] = aos_int[u'/RAW/HiggsTemplateCrossSections/STXS_stage%s%s[int_%s]'%(stage,suffix,param['param'])]
   # Also add SM
-  histDict['sm'] = aos[u'/RAW/HiggsTemplateCrossSections/STXS_stage%s%s[sm]'%(stage,suffix)]
+  histDict['sm'] = aos_sm[u'/RAW/HiggsTemplateCrossSections/STXS_stage%s%s[Weight_MERGING=0.000]'%(stage,suffix)]
+
+  # Extract scale factor: depends on number of jobs
+  nJobs_int = float(len(glob.glob("../../Events/%s_%s_int/yoda/%s_%s_int_run_*"%(process,ext,process,ext))))
+  nJobs_sm = float(len(glob.glob("../../Events/%s_%s_sm/yoda/%s_%s_sm_run_*"%(process,ext,process,ext))))
+  sf = nJobs_sm/nJobs_int
+  print " --> [DEBUG] sm = %.1f, int = %.1f --> sf = %.4f"%(nJobs_sm,nJobs_int,sf)
 
   # Define dicts to store Ai (+stat unc) for each param for each STXS process
   Ai = {}
@@ -82,9 +96,10 @@ def extract_Ai( stage, process, pois, inputFile, w=0.1 ):
       for param in pois:
         p = param['param']
         x_rwgt = histDict[p].bins[stxs_idx].sumW
-        u_rwgt = math.sqrt( histDict[p].bins[stxs_idx].sumW2 )
-        ai_tmp[p] = (x_rwgt-x_sm)/(x_sm*w)
-        u_ai_tmp[p] = abs(ai_tmp[p]*math.sqrt((u_rwgt/x_rwgt)*(u_rwgt/x_rwgt)+(u_sm/x_sm)*(u_sm/x_sm)))
+        u_rwgt = math.sqrt( abs(histDict[p].bins[stxs_idx].sumW2) )
+        ai_tmp[p] = sf*(x_rwgt/(x_sm*w))
+        if x_rwgt == 0: u_ai_tmp[p] = 0
+        else: u_ai_tmp[p] = abs(ai_tmp[p]*math.sqrt((u_rwgt/x_rwgt)*(u_rwgt/x_rwgt)+(u_sm/x_sm)*(u_sm/x_sm)))
 
       # Pruning: only save HEL params which have Ai > 0.001*max_Ai
       ai_pruned = {}
@@ -123,7 +138,7 @@ def extract_Ai( stage, process, pois, inputFile, w=0.1 ):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FUNCTION FOR EXTRACTING BSM TERMS: squared + cross terms
-def extract_Bij( stage, process, pois, inputFile_sm, inputFile_bsm, w=0.1, f=1., threshold=1e-8 ):
+def extract_Bij( stage, process, ext, pois, inputFile_sm, inputFile_bsm, w=0.1, f=1., threshold=1e-8 ):
   
   #Check input yoda files exist
   if not os.path.exists( inputFile_sm ):
@@ -151,16 +166,22 @@ def extract_Bij( stage, process, pois, inputFile_sm, inputFile_bsm, w=0.1, f=1.,
       if pois.index(param_i) < pois.index(param_j):
         histDict["bsm_%s%s"%(param_i['param'],param_j['param'])] = aos_bsm[u'/RAW/HiggsTemplateCrossSections/STXS_stage%s%s[bsm_%s_%s]'%(stage,suffix,param_i['param'],param_j['param'])]
   # Also add SM
-  histDict['sm'] = aos_sm[u'/RAW/HiggsTemplateCrossSections/STXS_stage%s%s[sm]'%(stage,suffix)]
+  histDict['sm'] = aos_sm[u'/RAW/HiggsTemplateCrossSections/STXS_stage%s%s[Weight_MERGING=0.000]'%(stage,suffix)]
+
+  # Extract scale factor: depends on number of jobs
+  nJobs_bsm = float(len(glob.glob("../../Events/%s_%s_bsm/yoda/%s_%s_bsm_run_*"%(process,ext,process,ext))))
+  nJobs_sm = float(len(glob.glob("../../Events/%s_%s_sm/yoda/%s_%s_sm_run_*"%(process,ext,process,ext))))
+  sf = nJobs_sm/nJobs_bsm
+  print " --> [DEBUG] sm = %.1f, bsm = %.1f --> sf = %.4f"%(nJobs_sm,nJobs_bsm,sf)
 
   # Calculate scaling factor: numEntries in SM/numEntries in BSM: FIXME change specific to cG
   #                           required as using different sample of events for bsm and sm
-  if process in ['vbf','wh','zh']: nEntries_BSM = float(histDict['bsm_cHW'].numEntries())
-  else: nEntries_BSM = float(histDict['bsm_cG'].numEntries())
-  nEntries_SM = histDict['sm'].numEntries()
+  #if process in ['vbf','wh','zh']: nEntries_BSM = float(histDict['bsm_cHW'].numEntries())
+  #else: nEntries_BSM = float(histDict['bsm_cG'].numEntries())
+  #nEntries_SM = histDict['sm'].numEntries()
   #print " --> [DEBUG] SM = %.4f, BSM = %.4f"%(nEntries_SM,nEntries_BSM)
-  sf = nEntries_SM/nEntries_BSM
-  print " --> [DEBUG] s.f. = %.4f"%sf
+  #sf = nEntries_SM/nEntries_BSM
+  #print " --> [DEBUG] s.f. = %.4f"%sf
 
   # Define dicts to store Bij for each param + param pair for each STXS process
   Bij = {}
@@ -332,13 +353,18 @@ def sf2text( stage, process, pois, ai_matrix, bij_matrix, linearOnly=True ):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FUNCTION FOR WRITING OUT EQUATION IN FORMAT TO BE READ BY COMBINE
-def sf2combine( stage, processes, pois, ai_matrix, bij_matrix, linearOnly=True ):
+def sf2combine( stage, processes, ext, pois, ai_matrix, bij_matrix, linearOnly=True ):
 
   if not os.path.isdir("./output"): os.system("mkdir ./output")
 
+  if ext == "": extStr = ""
+  else: extStr = "_%s"%ext
+
+  procStr = "_".join(processes.split(","))
+
   #Open file to write to
-  if linearOnly: f_out = open("output/stage%s_xs_Aionly_PURE.txt"%stage,"w")
-  else: f_out = open("output/stage%s_xs.txt"%stage,"w")
+  if linearOnly: f_out = open("output/stage%s_%s_xs_Aionly%s.txt"%(procStr,stage,ext),"w")
+  else: f_out = open("output/stage%s_%s_xs%s.txt"%(procStr,stage,ext),"w")
 
   equations = []
 
@@ -427,6 +453,9 @@ if __name__ == '__main__':
 
   print " --> STAGE: %s"%opt.stage
   print " --> PROCESSES: %s"%opt.processes
+  print " --> EXTENSION: %s"%opt.extension
+  if opt.extension == '': ext = ''
+  else: ext = '_%s'%opt.extension
 
   if opt.freezeOtherParameters: parametersOfInterest = HEL_parameters_subset
   else: parametersOfInterest = HEL_parameters
@@ -437,21 +466,33 @@ if __name__ == '__main__':
   for proc in opt.processes.split(","): 
 
     # Ai
-    fin = "../../Events/%s_pure/yoda/%s_pure.yoda"%(proc,proc)
+    fin_sm = "../../Events/%s%s_sm/yoda/%s%s_sm.yoda"%(proc,ext,proc,ext)
+    fin_int = "../../Events/%s%s_int/yoda/%s%s_int.yoda"%(proc,ext,proc,ext)
     #fin = "../../Events/%s/yoda/%s.yoda"%(proc,proc)
-    if proc == "vbf": Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, parametersOfInterest, fin, w=0.0001 )
-    else: Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, parametersOfInterest, fin, w=0.1 )
+    if proc == "vbf": Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, opt.extension, parametersOfInterest, fin_sm, fin_int, w=0.0001 )
+    #if proc == "vbf": Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, opt.extension, parametersOfInterest, fin_sm, fin_int, w=0.1 )
+    else: Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, opt.extension, parametersOfInterest, fin_sm, fin_int, w=0.1 )
 
     if not opt.linearOnly:
       # Bij
-      fin_bsm = "../../Events/%s_bsm/yoda/%s_bsm.yoda"%(proc,proc)
-      Bij_matrix[proc], u_Bij_matrix[proc] = extract_Bij( opt.stage, proc, parametersOfInterest, fin, fin_bsm, w=0.0001 )
+      fin_bsm = "../../Events/%s%s_bsm/yoda/%s%s_bsm.yoda"%(proc,ext,proc,ext)
+      Bij_matrix[proc], u_Bij_matrix[proc] = extract_Bij( opt.stage, proc, opt.extension, parametersOfInterest, fin_sm, fin_bsm, w=0.0001 )
 
     # Display full scaling functions to screen
     if opt.textOutput: sf2text( opt.stage, proc, parametersOfInterest, Ai_matrix, Bij_matrix, linearOnly=opt.linearOnly )
 
+  # Save Coefficients
+  if not os.path.isdir("./Ai"): os.system("mkdir ./Ai")
+  if not os.path.isdir("./Bij"): os.system("mkdir ./Bij")
+  procStr = "_".join(opt.processes.split(","))
+  with open('./Ai/Ai_matrix_stage%s_%s%s.pkl'%(opt.stage,procStr,ext),'wb') as f_Ai: pickle.dump(Ai_matrix,f_Ai)
+  with open('./Ai/u_Ai_matrix_stage%s_%s%s.pkl'%(opt.stage,procStr,ext),'wb') as f_Ai: pickle.dump(u_Ai_matrix,f_Ai)
+  if not opt.linearOnly:
+    with open('./Bij/Bij_matrix_stage%s_%s%s.pkl'%(opt.stage,procStr,ext),'wb') as f_Bij: pickle.dump(Bij_matrix,f_Bij)
+    with open('./Bij/u_Bij_matrix_stage%s_%s%s.pkl'%(opt.stage,procStr,ext),'wb') as f_Bij: pickle.dump(u_Bij_matrix,f_Bij)
 
-  if opt.combineOutput: sf2combine( opt.stage, opt.processes, parametersOfInterest, Ai_matrix, Bij_matrix, linearOnly=opt.linearOnly )
+
+  if opt.combineOutput: sf2combine( opt.stage, opt.processes, opt.extension, parametersOfInterest, Ai_matrix, Bij_matrix, linearOnly=opt.linearOnly )
 
  
   # LATEX output: hardcoded to give tables we want

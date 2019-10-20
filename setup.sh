@@ -4,8 +4,8 @@ set -e
 
 ### SET ENVIRONMENT VARIABLES HERE
 LHAPDF_CONFIG_PATH="/cvmfs/cms.cern.ch/slc7_amd64_gcc630/external/lhapdf/6.2.1-ghjeda/bin/lhapdf-config"
-MG_DIR="MG5_aMC_v2_6_5"
-MG_TARBALL="MG5_aMC_v2.6.5.tar.gz"
+MG_DIR="MG5_aMC_v2_6_6"
+MG_TARBALL="MG5_aMC_v2.6.6.tar.gz"
 ###
 
 wget https://launchpad.net/mg5amcnlo/2.0/2.6.x/+download/${MG_TARBALL}

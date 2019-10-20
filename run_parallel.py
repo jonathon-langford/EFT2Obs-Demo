@@ -2,7 +2,7 @@ import os, sys
 from optparse import OptionParser
 
 # Global variables
-MG_DIR = "MG5_aMC_v2_6_5"
+MG_DIR = "MG5_aMC_v2_6_6"
 rivetProcessDict = {"ggh":"GGF", "vbf":"VBF", "wh":"WH", "zh":"QQ2ZH", "ggzh":"GG2ZH", "tth":"TTH"}
 
 def leave():
@@ -14,6 +14,7 @@ def get_options():
   parser.add_option('--process', dest='process', default='ggh', help='Signal process')
   parser.add_option('--runLabel', dest='runLabel', default='pilot', help='Run label')
   parser.add_option('--nEvents', dest='nEvents', default='', help='Number of events per run')
+  parser.add_option('--disableReweight', dest='disableReweight', default=0, type='int', help='Disable reweight option')
   parser.add_option('--classificationOnly', dest='classificationOnly', default=0, type='int', help='Only run classification stage (Rivet)')
   parser.add_option('--saveMG5RunDir', dest='saveMG5RunDir', default=0, type='int', help="Save MG5 run directory [yes=1,no=0]")
   parser.add_option('--saveHepMC', dest='saveHepMC', default=0, type='int', help="Save HepMC output [yes=1,no=0]")
@@ -64,7 +65,9 @@ if not opt.classificationOnly:
   print " --> Preparing %s_%s"%(opt.process,opt.runLabel)
 
   # Copy cards across: first check if they exist
-  for card in ['param','pythia8','reweight','run']:
+  if opt.disableReweight: cardNames = ['param','pythia8','run']
+  else: cardNames = ['param','pythia8','reweight','run']
+  for card in cardNames:
     missingCardFlag = False
     if not os.path.exists( "./Cards/%s/%s_card.dat"%(opt.process,card) ):
       print " [ERROR] %s_card.dat for process %s does not exist. Please add to ./Cards/%s"%(card,opt.process,opt.process)
@@ -72,8 +75,12 @@ if not opt.classificationOnly:
   if missingCardFlag: leave()
 
   #Copy cards across to relevant dir
-  print " --> Copying ./Cards/%s/{param,pythia8,reweight,run}_card.dat to %s/run/%s_%s/Cards/"%(opt.process,MG_DIR,opt.process,opt.runLabel)
-  os.system("cp Cards/%s/{param,pythia8,reweight,run}_card.dat %s/run/%s_%s/Cards"%(opt.process,MG_DIR,opt.process,opt.runLabel))
+  if opt.disableReweight: 
+    print " --> Copying ./Cards/%s/{param,pythia8,run}_card.dat to %s/run/%s_%s/Cards/"%(opt.process,MG_DIR,opt.process,opt.runLabel)
+    os.system("cp Cards/%s/{param,pythia8,run}_card.dat %s/run/%s_%s/Cards"%(opt.process,MG_DIR,opt.process,opt.runLabel))
+  else:
+    print " --> Copying ./Cards/%s/{param,pythia8,reweight,run}_card.dat to %s/run/%s_%s/Cards/"%(opt.process,MG_DIR,opt.process,opt.runLabel)
+    os.system("cp Cards/%s/{param,pythia8,reweight,run}_card.dat %s/run/%s_%s/Cards"%(opt.process,MG_DIR,opt.process,opt.runLabel))
 
   # Change pythia card for name of output hepmc
   os.system("sed -i \"s/HEPMCoutput:file.*/HEPMCoutput:file         = %s_%s.hepmc/g\" %s/run/%s_%s/Cards/pythia8_card.dat"%(opt.process,opt.runLabel,MG_DIR,opt.process,opt.runLabel))
@@ -85,7 +92,8 @@ if not opt.classificationOnly:
 
   #Create MG config
   print " --> Creating MG run script..."
-  os.system("pushd %s/run/%s_%s; { echo \"shower=Pythia8\"; echo \"reweight=ON\"; echo \"done\"; } > mgrunscript; popd"%(MG_DIR,opt.process,opt.runLabel))
+  if opt.disableReweight: os.system("pushd %s/run/%s_%s; { echo \"shower=Pythia8\"; echo \"done\"; } > mgrunscript; popd"%(MG_DIR,opt.process,opt.runLabel))
+  else: os.system("pushd %s/run/%s_%s; { echo \"shower=Pythia8\"; echo \"reweight=ON\"; echo \"done\"; } > mgrunscript; popd"%(MG_DIR,opt.process,opt.runLabel))
 
   print " --> Finished preparing %s_%s"%(opt.process,opt.runLabel)
    

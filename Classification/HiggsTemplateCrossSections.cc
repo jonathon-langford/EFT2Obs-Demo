@@ -295,20 +295,17 @@ namespace Rivet {
         if (x<bins[i]) return i-1;
       return bins.size()-1;
     }
-    
-    /// @brief VBF topology selection
-    /// 0 = fail loose selection: m_jj > 350 GeV
-    /// 1 pass loose, but fail additional cut pT(Hjj)<25. 2 pass pT(Hjj)>25 selection
-    /// 3 pass tight (m_jj>700 GeV), but fail additional cut pT(Hjj)<25. 4 pass pT(Hjj)>25 selection
-    int vbfTopology(const Jets &jets, const Particle &higgs) {
-      if (jets.size()<2) return 0;
-      const FourMomentum &j1=jets[0].momentum(), &j2=jets[1].momentum();
-      double mjj = (j1+j2).mass();
-      if(mjj>350 && mjj<=700) return (j1+j2+higgs.momentum()).pt()<25 ? 1 : 2;
-      else if(mjj>700) return (j1+j2+higgs.momentum()).pt()<25 ? 3 : 4;
-      else return 0;
-    }
 
+    /// @brief VBF topolog selection
+    /// 0 = fail loose selction: m_jj > 400 GeV and Dy_jj > 2.8 
+    /// 1 pass loose, but fail additional cut pT(Hjj)<25. 2 pass tight selection
+    int vbfTopology_Stage1(const Jets &jets, const Particle &higgs) {
+      if (jets.size()<2) return 0;
+        const FourMomentum &j1=jets[0].momentum(), &j2=jets[1].momentum();
+        bool VBFtopo = (j1+j2).mass() > 400.0 && std::abs(j1.rapidity()-j2.rapidity()) > 2.8;
+        return VBFtopo ? (j1+j2+higgs.momentum()).pt()<25 ? 2 : 1 : 0;
+    }
+                 
     /// @brief VBF topology selection Stage1.1
     /// 0 = fail loose selection: m_jj > 350 GeV
     /// 1 pass loose, but fail additional cut pT(Hjj)<25. 2 pass pT(Hjj)>25 selection
@@ -366,7 +363,7 @@ namespace Rivet {
       using namespace STXS::Stage1;
       int Njets = jets.size(), ctrlHiggs = std::abs(higgs.rapidity()) < 2.5, fwdHiggs = !ctrlHiggs;
       double pTj1 = !jets.empty() ? jets[0].momentum().pt() : 0;
-      int vbfTopo = vbfTopology(jets, higgs);
+      int vbfTopo = vbfTopology_Stage1(jets, higgs);
 
       // 1. GGF Stage 1 categories
       //    Following YR4 write-up: XXXXX
@@ -453,7 +450,7 @@ namespace Rivet {
 					     const Particle &V) {
       using namespace STXS::Stage1_1;
       int Njets=jets.size(), ctrlHiggs = std::abs(higgs.rapidity())<2.5, fwdHiggs = !ctrlHiggs;
-      int vbfTopo = vbfTopology(jets,higgs);
+      int vbfTopo = vbfTopology_Stage1_1(jets,higgs);
 
       // 1. GGF Stage 1 categories
       //    Following YR4 write-up: XXXXX
@@ -659,19 +656,24 @@ namespace Rivet {
       m_sumw += weight;
 
       int F=cat.stage0_cat%10, P1 = cat.stage1_cat_pTjet30GeV/100, P1_1=cat.stage1_1_cat_pTjet30GeV/100;
+      int P1_25 = cat.stage1_cat_pTjet25GeV/100, P1_1_25=cat.stage1_1_cat_pTjet25GeV/100;
       hist_stage0->fill( cat.stage0_cat/10*2+F, weight );
       
       // Stage 1 enum offsets for each production mode: GGF=12, VBF=6, WH= 5, QQ2ZH=5, GG2ZH=4, TTH=2, BBH=2, TH=2
       static vector<int> offset1({0,1,13,19,24,29,33,35,37,39});
       int off1 = offset1[P1];
+      int off1_25 = offset1[P1_25];
       // Stage 1 enum offsets for each production mode: GGF=14, VBF=11, WH= 6, QQ2ZH=6, GG2ZH=6, TTH=2, BBH=2, TH=2
       static vector<int> offset1_1({0,1,15,26,32,38,44,46,48,50});
       int off1_1 = offset1_1[P1_1];
+      int off1_1_25 = offset1_1[P1_1_25];
       // Stage 1_1 enum offsets for each production mode: GGF=21, VBF=25, WH= 16, QQ2ZH=16, GG2ZH=16, TTH=2, BBH=2, TH=2
       //static vector<int> offset1_1_fine({0,1,22,47,63,79,95,97,99,101});
       //int off1_1_fine = offset1_1_fine[P1_1];
 
       //Fill nominal STXS cateogry histograms
+      hist_stage1_pTjet25->fill(cat.stage1_cat_pTjet25GeV%100 + off1_25, weight);
+      hist_stage1_1_pTjet25->fill(cat.stage1_1_cat_pTjet25GeV%100 + off1_1_25, weight);
       hist_stage1_pTjet30->fill(cat.stage1_cat_pTjet30GeV%100 + off1, weight);
       hist_stage1_1_pTjet30->fill(cat.stage1_1_cat_pTjet30GeV%100 + off1_1, weight);
       //hist_stage1_1_fine_pTjet30->fill(cat.stage1_1_fine_cat_pTjet30GeV%100 + off1_1_fine, weight);
@@ -719,7 +721,7 @@ namespace Rivet {
       printClassificationSummary();
       double sf = m_sumw>0?1.0/m_sumw:1.0;
       //for (auto hist:{hist_stage0,hist_stage1_pTjet30,hist_stage1_1_pTjet30,hist_stage1_1_fine_pTjet30,hist_Njets25,hist_Njets30,
-      for (auto hist:{hist_stage1_pTjet30,hist_stage1_1_pTjet30})
+      for (auto hist:{hist_stage1_pTjet25,hist_stage1_1_pTjet25,hist_stage1_pTjet30,hist_stage1_1_pTjet30})
 	scale(hist, sf);
     }
     
@@ -729,6 +731,8 @@ namespace Rivet {
 
     void initializeHistos(){
       book(hist_stage0,"STXS_stage0",20,0,20);
+      book(hist_stage1_pTjet25,"STXS_stage1_pTjet25",51,0,51);
+      book(hist_stage1_1_pTjet25,"STXS_stage1_1_pTjet25",51,0,51);
       book(hist_stage1_pTjet30,"STXS_stage1_pTjet30",51,0,51);
       book(hist_stage1_1_pTjet30,"STXS_stage1_1_pTjet30",51,0,51);
       //book(hist_stage1_1_fine_pTjet30,"STXS_stage1_1_fine_pTjet30",102,0,102);
@@ -758,6 +762,8 @@ namespace Rivet {
     //Histo1DPtr hist_Njets25, hist_Njets30;
     // For STXS
     Histo1DPtr hist_stage0;
+    Histo1DPtr hist_stage1_pTjet25;
+    Histo1DPtr hist_stage1_1_pTjet25;
     Histo1DPtr hist_stage1_pTjet30;
     Histo1DPtr hist_stage1_1_pTjet30;
     //Histo1DPtr hist_stage1_1_fine_pTjet30;
