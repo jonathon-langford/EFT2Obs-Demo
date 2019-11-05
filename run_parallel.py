@@ -3,7 +3,7 @@ from optparse import OptionParser
 
 # Global variables
 MG_DIR = "MG5_aMC_v2_6_6"
-rivetProcessDict = {"ggh":"GGF", "vbf":"VBF", "wh":"WH", "zh":"QQ2ZH", "ggzh":"GG2ZH", "tth":"TTH"}
+rivetProcessDict = {"ggh":"GGF", "vbf":"VBF", "wh":"WH", "zh":"QQ2ZH", "ggzh":"GG2ZH", "tth":"TTH", "bbh":"BBH"}
 
 def leave():
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~ EFT2OBS RUN (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~"

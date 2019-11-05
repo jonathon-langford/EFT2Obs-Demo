@@ -312,7 +312,7 @@ def plot_Bij( outDir, stage, process, bij_matrix, u_bij_matrix, stxs_bins, eft_p
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Function to plot Ai comparison: wg1 note and stxs2eft
-def plot_Ai_comparison( outDir, stage, process, ai_matrix_base, ai_matrix_new, u_ai_matrix_new, stxs_bins, eft_parameters, procToSTXSProductionModeMap, verbose=False ):
+def plot_Ai_comparison( outDir, stage, process, ext, ai_matrix_base, ai_matrix_new, u_ai_matrix_new, stxs_bins, eft_parameters, procToSTXSProductionModeMap, verbose=False ):
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # CHECKS
@@ -339,9 +339,9 @@ def plot_Ai_comparison( outDir, stage, process, ai_matrix_base, ai_matrix_new, u
   # Global settings
   ROOT.gStyle.SetOptStat(0)
   ROOT.gROOT.SetBatch(ROOT.kTRUE) #suppress output to screen
-  #procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616} # VBF
-  #procColorMap = {"ggh":862,"vbf":632,"wh":418,"zh":413,"tth":616} #WH Had
-  procColorMap = {"ggh":862,"vbf":894,"wh":418,"zh":413,"tth":616} #ZH Had
+  if "wh_had" in ext: procColorMap = {"ggh":862,"vbf":632,"wh":418,"zh":413,"tth":616} #WH Had
+  elif "zh_had" in ext: procColorMap = {"ggh":862,"vbf":894,"wh":418,"zh":413,"tth":616} #ZH Had
+  else: procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616} # VBF
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Loop over STXS bins relevant to process
@@ -640,7 +640,7 @@ def plot_Ai_comparison( outDir, stage, process, ai_matrix_base, ai_matrix_new, u
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
 # Function to plot Bij comparison: wg1 note and stxs2eft
-def plot_Bij_comparison( outDir, stage, process, bij_matrix_base, bij_matrix_new, u_bij_matrix_new, stxs_bins, eft_parameters, procToSTXSProductionModeMap, verbose=False ):
+def plot_Bij_comparison( outDir, stage, process, ext, bij_matrix_base, bij_matrix_new, u_bij_matrix_new, stxs_bins, eft_parameters, procToSTXSProductionModeMap, verbose=False ):
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # CHECKS
@@ -667,9 +667,9 @@ def plot_Bij_comparison( outDir, stage, process, bij_matrix_base, bij_matrix_new
   # Global settings
   ROOT.gStyle.SetOptStat(0)
   ROOT.gROOT.SetBatch(ROOT.kTRUE) #suppress output to screen
-  #procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616} # VBF
-  #procColorMap = {"ggh":862,"vbf":632,"wh":418,"zh":413,"tth":616} #WH Had
-  procColorMap = {"ggh":862,"vbf":894,"wh":418,"zh":413,"tth":616} #ZH Had
+  if "wh_had" in ext: procColorMap = {"ggh":862,"vbf":632,"wh":418,"zh":413,"tth":616} #WH Had
+  elif "zh_had" in ext: procColorMap = {"ggh":862,"vbf":894,"wh":418,"zh":413,"tth":616} #ZH Had
+  else: procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616} # VBF
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Loop over STXS bins relevant to process
@@ -781,8 +781,9 @@ def plot_Bij_comparison( outDir, stage, process, bij_matrix_base, bij_matrix_new
         
       # Set minimum and maximum in y-axis
       max_bij = math.pow(10,math.log(5*max_bij,10))
-      if math.pow(10,int(math.log(min_bij))-1) < 0.001: min_bij = 0.00101
-      else: min_bij = math.pow(10,int(math.log(min_bij))-1)
+      min_bij = 0.00101
+      #if math.pow(10,int(math.log(min_bij))-1) < 0.001: min_bij = 0.00101
+      #else: min_bij = math.pow(10,int(math.log(min_bij))-1)
       h_axes.SetMaximum(max_bij)
       h_axes.SetMinimum(min_bij)
 

@@ -46,6 +46,19 @@ def get_options():
 (opt,args) = get_options()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Change WG1 terms if looking at VH hadronic
+if "wh_had" in opt.extension:
+  from wg1_note.stage1_Ai import Ai_matrix_wg1_wh_had
+  from wg1_note.stage1_Bij import Bij_matrix_wg1_wh_had
+  Ai_matrix_wg1['vbf'] = Ai_matrix_wg1_wh_had
+  Bij_matrix_wg1['vbf'] = Bij_matrix_wg1_wh_had
+elif "zh_had" in opt.extension:
+  from wg1_note.stage1_Ai import Ai_matrix_wg1_zh_had
+  from wg1_note.stage1_Bij import Bij_matrix_wg1_zh_had
+  Ai_matrix_wg1['vbf'] = Ai_matrix_wg1_zh_had
+  Bij_matrix_wg1['vbf'] = Bij_matrix_wg1_zh_had
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FUNCTION FOR EXTRACT INTERFERENCE TERM
 def extract_Ai( stage, process, ext, pois, inputFile_sm, inputFile_int, w=0.1 ):
 
@@ -520,10 +533,10 @@ if __name__ == '__main__':
   if opt.outputDir != '': 
     for proc in opt.processes.split(","):
       if opt.plotAi: plot_Ai( opt.outputDir, opt.stage, proc, Ai_matrix, u_Ai_matrix, STXS_bins, parametersOfInterest, proc_to_STXS )
-      if opt.plotAiValidation: plot_Ai_comparison( opt.outputDir, opt.stage, proc, Ai_matrix_wg1, Ai_matrix, u_Ai_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, verbose=opt.verbose )
+      if opt.plotAiValidation: plot_Ai_comparison( opt.outputDir, opt.stage, proc, opt.extension, Ai_matrix_wg1, Ai_matrix, u_Ai_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, verbose=opt.verbose )
       if not opt.linearOnly:
         if opt.plotBij: plot_Bij( opt.outputDir, opt.stage, proc, Bij_matrix, u_Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS )
-        if opt.plotBijValidation: plot_Bij_comparison( opt.outputDir, opt.stage, proc, Bij_matrix_wg1, Bij_matrix, u_Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, verbose=opt.verbose )
+        if opt.plotBijValidation: plot_Bij_comparison( opt.outputDir, opt.stage, proc, opt.extension, Bij_matrix_wg1, Bij_matrix, u_Bij_matrix, STXS_bins, parametersOfInterest, proc_to_STXS, verbose=opt.verbose )
 
   # Finished
   leave( exit=False )

@@ -45,24 +45,6 @@ Ai_matrix_wg1 = {
    'QQ2HQQ_PTJET1_GT200':{"cWW":7.82,"cB":-0.1868,"cHW":-30.65,"cHB":-2.371}
    },
 
-  # Purely WH had terms: from twiki
-  #'vbf':{
-  # 'QQ2HQQ_VBFTOPO_JET3VETO':{"cH":-0.94,"cWW":39.5,"cHW":13.8,"cpHQ":32.1},
-  # 'QQ2HQQ_VBFTOPO_JET3':{"cH":-1.04,"cWW":44.9,"cHW":20.3,"cpHQ":36.8},
-  # 'QQ2HQQ_VH2JET':{"cH":-0.996,"cWW":45.57,"cHW":23.66,"cpHQ":37.55},
-  # 'QQ2HQQ_REST':{"cH":-1.002,"cWW":34.29,"cHW":11.56,"cpHQ":26.27},
-  # 'QQ2HQQ_PTJET1_GT200':{"cH":-1.003,"cWW":181.2,"cHW":152.3,"cpHQ":173.7}
-  # },
-
-  # Purely ZH had terms: from twiki
-  #'vbf':{
-  # 'QQ2HQQ_VBFTOPO_JET3VETO':{"cH":-0.94,"cT":-4.0,"cWW":34.8,"cB":10.0,"cHW":9.9,"cHB":3.04,"cHQ":-2.14,"cpHQ":31.1,"cHu":7.6,"cHd":-2.59},
-  # 'QQ2HQQ_VBFTOPO_JET3':{"cH":-0.97,"cT":-3.98,"cWW":38.1,"cB":10.5,"cHW":14.2,"cHB":4.15,"cHQ":-2.36,"cpHQ":34.5,"cHu":8.4,"cHd":-2.79},
-  # 'QQ2HQQ_VH2JET':{"cH":-0.998,"cT":-4.002,"cWW":37.99,"cB":10.47,"cHW":16.45,"cHB":4.927,"cHQ":-2.401,"cpHQ":34.45,"cHu":7.94,"cHd":-2.993},
-  # 'QQ2HQQ_REST':{"cH":-1.001,"cT":-3.998,"cWW":30.89,"cB":8.35,"cHW":8.71,"cHB":2.616,"cHQ":-1.782,"cpHQ":26.1,"cHu":5.942,"cHd":-2.305},
-  # 'QQ2HQQ_PTJET1_GT200':{"cH":-1.003,"cT":-4.03,"cWW":141.5,"cB":41.6,"cHW":112.5,"cHB":33.6,"cHQ":-11.52,"cpHQ":156.2,"cHu":38.9,"cHd":-12.53}
-  #},
-
   'wh':{
    'QQ2HLNU_PTV_0_150':{'cpHL': 2.0, 'cH': -1.0, 'cpHQ': 24.0, 'cWW': 34.0, 'cHW': 11.0},
    'QQ2HLNU_PTV_150_250_0J':{'cpHL': 2.0, 'cH': -1.0, 'cpHQ': 67.0, 'cWW': 76.0, 'cHW': 51.0},
@@ -80,4 +62,20 @@ Ai_matrix_wg1 = {
   'tth':{
    'TTH':{'cH': -0.98, 'c3G': 27.0, "cG'": 0.93, 'cuG': 310.0, 'c2G': -13.0, 'cu': 2.9}
    }
+}
+
+Ai_matrix_wg1_wh_had = {
+  'QQ2HQQ_VBFTOPO_JET3VETO':{"cH":-0.94,"cWW":39.5,"cHW":13.8,"cpHQ":32.1},
+  'QQ2HQQ_VBFTOPO_JET3':{"cH":-1.04,"cWW":44.9,"cHW":20.3,"cpHQ":36.8},
+  'QQ2HQQ_VH2JET':{"cH":-0.996,"cWW":45.57,"cHW":23.66,"cpHQ":37.55},
+  'QQ2HQQ_REST':{"cH":-1.002,"cWW":34.29,"cHW":11.56,"cpHQ":26.27},
+  'QQ2HQQ_PTJET1_GT200':{"cH":-1.003,"cWW":181.2,"cHW":152.3,"cpHQ":173.7} 
+}
+
+Ai_matrix_wg1_zh_had = {
+  'QQ2HQQ_VBFTOPO_JET3VETO':{"cH":-0.94,"cT":-4.0,"cWW":34.8,"cB":10.0,"cHW":9.9,"cHB":3.04,"cHQ":-2.14,"cpHQ":31.1,"cHu":7.6,"cHd":-2.59},
+  'QQ2HQQ_VBFTOPO_JET3':{"cH":-0.97,"cT":-3.98,"cWW":38.1,"cB":10.5,"cHW":14.2,"cHB":4.15,"cHQ":-2.36,"cpHQ":34.5,"cHu":8.4,"cHd":-2.79},
+  'QQ2HQQ_VH2JET':{"cH":-0.998,"cT":-4.002,"cWW":37.99,"cB":10.47,"cHW":16.45,"cHB":4.927,"cHQ":-2.401,"cpHQ":34.45,"cHu":7.94,"cHd":-2.993},
+  'QQ2HQQ_REST':{"cH":-1.001,"cT":-3.998,"cWW":30.89,"cB":8.35,"cHW":8.71,"cHB":2.616,"cHQ":-1.782,"cpHQ":26.1,"cHu":5.942,"cHd":-2.305},
+  'QQ2HQQ_PTJET1_GT200':{"cH":-1.003,"cT":-4.03,"cWW":141.5,"cB":41.6,"cHW":112.5,"cHB":33.6,"cHQ":-11.52,"cpHQ":156.2,"cHu":38.9,"cHd":-12.53}
 }

@@ -1,0 +1,5 @@
+import model HEL_UFO_fixed_MZ
+
+generate p p > b b~ h @0
+
+output bbh_sm -nojpeg

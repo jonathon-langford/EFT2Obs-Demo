@@ -1,0 +1,10 @@
+import model HEL_UFO_fixed_MZ
+
+define ell+ = e+ mu+ ta+
+define ell- = e- mu- ta-
+define j2 = g u c d s u~ c~ d~ s~
+
+generate p p > h ell+ ell- / j2 ell+ ell- vl vl~ a h w+ w- NP^2==2 @0
+add process p p > h vl vl~ / j2 ell+ ell- vl vl~ a h w+ w- NP^2==2 @1
+
+output zh_bsm -nojpeg
