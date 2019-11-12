@@ -339,9 +339,9 @@ def plot_Ai_comparison( outDir, stage, process, ext, ai_matrix_base, ai_matrix_n
   # Global settings
   ROOT.gStyle.SetOptStat(0)
   ROOT.gROOT.SetBatch(ROOT.kTRUE) #suppress output to screen
-  if "wh_had" in ext: procColorMap = {"ggh":862,"vbf":632,"wh":418,"zh":413,"tth":616} #WH Had
-  elif "zh_had" in ext: procColorMap = {"ggh":862,"vbf":894,"wh":418,"zh":413,"tth":616} #ZH Had
-  else: procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616} # VBF
+  if "wh_had" in ext: procColorMap = {"ggh":862,"vbf":632,"wh_had":632,"zh_had":894,"wh":418,"zh":413,"tth":616} #WH Had
+  elif "zh_had" in ext: procColorMap = {"ggh":862,"vbf":894,"wh_had":632,"zh_had":894,"wh":418,"zh":413,"tth":616} #ZH Had
+  else: procColorMap = {"ggh":862,"vbf":807,"wh_had":632,"zh_had":894,"wh":418,"zh":413,"tth":616} # VBF
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Loop over STXS bins relevant to process
@@ -667,9 +667,9 @@ def plot_Bij_comparison( outDir, stage, process, ext, bij_matrix_base, bij_matri
   # Global settings
   ROOT.gStyle.SetOptStat(0)
   ROOT.gROOT.SetBatch(ROOT.kTRUE) #suppress output to screen
-  if "wh_had" in ext: procColorMap = {"ggh":862,"vbf":632,"wh":418,"zh":413,"tth":616} #WH Had
-  elif "zh_had" in ext: procColorMap = {"ggh":862,"vbf":894,"wh":418,"zh":413,"tth":616} #ZH Had
-  else: procColorMap = {"ggh":862,"vbf":807,"wh":418,"zh":413,"tth":616} # VBF
+  if "wh_had" in ext: procColorMap = {"ggh":862,"vbf":632,"wh_had":632,"zh_had":894,"wh":418,"zh":413,"tth":616} #WH Had
+  elif "zh_had" in ext: procColorMap = {"ggh":862,"vbf":894,"wh_had":632,"zh_had":894,"wh":418,"zh":413,"tth":616} #ZH Had
+  else: procColorMap = {"ggh":862,"vbf":807,"wh_had":632,"zh_had":894,"wh":418,"zh":413,"tth":616} # VBF
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Loop over STXS bins relevant to process

@@ -18,7 +18,7 @@ from wg1_note.stage1_Bij import Bij_matrix_wg1
 from plotting.stxs2eft_plotting_scripts import plot_Ai, plot_Bij, plot_Ai_comparison, plot_Bij_comparison
 from plotting.stxs2eft_latex import sf2latex
 
-proc_to_STXS = {'ggh':'GG2H','vbf':'QQ2HQQ', 'wh':'QQ2HLNU','zh':'QQ2HLL','tth':'TTH'}
+proc_to_STXS = {'ggh':'GG2H','vbf':'QQ2HQQ', 'wh':'QQ2HLNU','zh':'QQ2HLL', 'wh_had':'QQ2HQQ', 'zh_had':'QQ2HQQ','tth':'TTH', 'bbh':'BBH'}
 offset = {'stage0':2, 'stage1':1, 'stage1_1':1}
 
 def leave( exit=True ):
@@ -47,7 +47,12 @@ def get_options():
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Change WG1 terms if looking at VH hadronic
-if "wh_had" in opt.extension:
+if "stxs" in opt.extension:
+  from wg1_note.stage1_Ai import Ai_matrix_wg1_stxs
+  from wg1_note.stage1_Bij import Bij_matrix_wg1_stxs
+  Ai_matrix_wg1['vbf'] = Ai_matrix_wg1_stxs
+  Bij_matrix_wg1['vbf'] = Bij_matrix_wg1_stxs
+elif "wh_had" in opt.extension:
   from wg1_note.stage1_Ai import Ai_matrix_wg1_wh_had
   from wg1_note.stage1_Bij import Bij_matrix_wg1_wh_had
   Ai_matrix_wg1['vbf'] = Ai_matrix_wg1_wh_had
@@ -70,6 +75,10 @@ def extract_Ai( stage, process, ext, pois, inputFile_sm, inputFile_int, w=0.1 ):
     print " --> [ERROR] input file %s does not exists. Leaving..."%inputFile_int
     leave()
 
+  # Extract extension string
+  if ext != '': extStr = "_%s"%opt.extension
+  else: extStr = ''
+
   # Extract all objects from yoda file
   aos_sm = yoda.read( inputFile_sm )
   aos_int = yoda.read( inputFile_int )
@@ -85,8 +94,8 @@ def extract_Ai( stage, process, ext, pois, inputFile_sm, inputFile_int, w=0.1 ):
   histDict['sm'] = aos_sm[u'/RAW/HiggsTemplateCrossSections/STXS_stage%s%s[Weight_MERGING=0.000]'%(stage,suffix)]
 
   # Extract scale factor: depends on number of jobs
-  nJobs_int = float(len(glob.glob("../../Events/%s_%s_int/yoda/%s_%s_int_run_*"%(process,ext,process,ext))))
-  nJobs_sm = float(len(glob.glob("../../Events/%s_%s_sm/yoda/%s_%s_sm_run_*"%(process,ext,process,ext))))
+  nJobs_int = float(len(glob.glob("../../Events/%s%s_int/yoda/%s%s_int_run_*"%(process,extStr,process,extStr))))
+  nJobs_sm = float(len(glob.glob("../../Events/%s%s_sm/yoda/%s%s_sm_run_*"%(process,extStr,process,extStr))))
   sf = nJobs_sm/nJobs_int
   print " --> [DEBUG] sm = %.1f, int = %.1f --> sf = %.4f"%(nJobs_sm,nJobs_int,sf)
 
@@ -161,6 +170,10 @@ def extract_Bij( stage, process, ext, pois, inputFile_sm, inputFile_bsm, w=0.1, 
     print " --> [ERROR] BSM input file %s does not exist. Leaving..."%inputFile_bsm
     leave()
 
+  # Extract extension string
+  if ext != '': extStr = "_%s"%opt.extension
+  else: extStr = ''
+
   # Extract all objects from yoda files
   aos_sm = yoda.read( inputFile_sm )
   aos_bsm = yoda.read( inputFile_bsm )
@@ -182,8 +195,8 @@ def extract_Bij( stage, process, ext, pois, inputFile_sm, inputFile_bsm, w=0.1, 
   histDict['sm'] = aos_sm[u'/RAW/HiggsTemplateCrossSections/STXS_stage%s%s[Weight_MERGING=0.000]'%(stage,suffix)]
 
   # Extract scale factor: depends on number of jobs
-  nJobs_bsm = float(len(glob.glob("../../Events/%s_%s_bsm/yoda/%s_%s_bsm_run_*"%(process,ext,process,ext))))
-  nJobs_sm = float(len(glob.glob("../../Events/%s_%s_sm/yoda/%s_%s_sm_run_*"%(process,ext,process,ext))))
+  nJobs_bsm = float(len(glob.glob("../../Events/%s%s_bsm/yoda/%s%s_bsm_run_*"%(process,extStr,process,extStr))))
+  nJobs_sm = float(len(glob.glob("../../Events/%s%s_sm/yoda/%s%s_sm_run_*"%(process,extStr,process,extStr))))
   sf = nJobs_sm/nJobs_bsm
   print " --> [DEBUG] sm = %.1f, bsm = %.1f --> sf = %.4f"%(nJobs_sm,nJobs_bsm,sf)
 
@@ -261,6 +274,7 @@ def extract_Bij( stage, process, ext, pois, inputFile_sm, inputFile_bsm, w=0.1, 
         if abs(bij) > max_bij: max_bij = abs(bij)
       for p,bij in bij_tmp.iteritems():
         if abs(bij) > 0.00001*max_bij:
+        #if abs(bij) > 0.00000001*max_bij:
           bij_pruned[p] = bij
           u_bij_pruned[p] = u_bij_tmp[p]
 
@@ -481,10 +495,9 @@ if __name__ == '__main__':
     # Ai
     fin_sm = "../../Events/%s%s_sm/yoda/%s%s_sm.yoda"%(proc,ext,proc,ext)
     fin_int = "../../Events/%s%s_int/yoda/%s%s_int.yoda"%(proc,ext,proc,ext)
-    #fin = "../../Events/%s/yoda/%s.yoda"%(proc,proc)
-    if proc == "vbf": Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, opt.extension, parametersOfInterest, fin_sm, fin_int, w=0.0001 )
-    #if proc == "vbf": Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, opt.extension, parametersOfInterest, fin_sm, fin_int, w=0.1 )
-    else: Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, opt.extension, parametersOfInterest, fin_sm, fin_int, w=0.1 )
+    Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, opt.extension, parametersOfInterest, fin_sm, fin_int, w=0.0001 )
+    #if proc == "vbf": Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, opt.extension, parametersOfInterest, fin_sm, fin_int, w=0.0001 )
+    #else: Ai_matrix[proc], u_Ai_matrix[proc] = extract_Ai( opt.stage, proc, opt.extension, parametersOfInterest, fin_sm, fin_int, w=0.0001 )
 
     if not opt.linearOnly:
       # Bij

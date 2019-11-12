@@ -3,9 +3,10 @@ w = "0.0001"
 
 eft_params = ["cH","cT","c6","cu","cd","cl","cWW","cB","cHW","cHB","cA","cG","cHQ","cpHQ","cHu","cHd","cHud","cHL","cpHL","cHe","cuB","cuW","cuG","cdB","cdW","cdG","clB","clW","c3W","c3G","c2W","c2B","c2G","tcHW","tcHB","tcG","tcA","tc3W","tc3G"]
 
-pois = ["cu","cd","cl","cWW","cB","cHW","cHB","cA","cG"]
+#pois = ["cu","cd","cl","cWW","cB","cHW","cHB","cA","cG"]
+pois = ["cWW","cHW"]
 
-f = open("./reweight_card_%s_subset.dat"%mode,"w")
+f = open("./reweight_card_%s_test.dat"%mode,"w")
 
 # LINEAR/SQUARED TERMS
 for poi in pois:
